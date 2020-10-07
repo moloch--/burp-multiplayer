@@ -50,6 +50,7 @@ public class BurpExtender implements IBurpExtender, ITab {
         }
     }
 
+    // Loggers
     public void logInfo(String msg) {
         BurpExtender.callbacks.printOutput(String.format("[*] %s", msg));
     }
