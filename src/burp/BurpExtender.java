@@ -17,16 +17,15 @@ public class BurpExtender implements IBurpExtender, ITab {
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
         BurpExtender.callbacks = callbacks;
-        BurpExtender.callbacks.printOutput("[*] Coverage plugin loading ...");
+        this.logInfo("Coverage plugin loading ...");
         BurpExtender.callbacks.setExtensionName(BurpExtender.name);
+        BurpExtender.coverage = new Coverage(callbacks);
+        
+        // Build Root GUI Components
+        BurpExtender.connectionPanel = new ConnectionPanel(BurpExtender.coverage); 
         BurpExtender.mainTabbedPane = new JTabbedPane();
-
-        // Build Tab Panels
-        BurpExtender.connectionPanel = new ConnectionPanel(); 
-        mainTabbedPane.addTab("Connection", BurpExtender.connectionPanel);
-
-
-        // Register Root Tab
+        
+        // Register Us as an ITab
         BurpExtender.callbacks.addSuiteTab(BurpExtender.this);
 
         // HTTP Listener
@@ -42,8 +41,26 @@ public class BurpExtender implements IBurpExtender, ITab {
 
     @Override
     public Component getUiComponent() {
-        return mainTabbedPane;
+        if (BurpExtender.isConnected) {
+            this.logInfo("Connected to database, loading main GUI");
+            return mainTabbedPane;
+        } else {
+            this.logInfo("Not connected to database, loading connection panel");
+            return connectionPanel;
+        }
     }
 
+    
+    public void logInfo(String msg) {
+        BurpExtender.callbacks.printOutput(String.format("[*] %s", msg));
+    }
+    
+    public void logWarn(String msg) {
+        BurpExtender.callbacks.printOutput(String.format("[!] %s", msg));
+    }
+    
+    public void logError(String msg) {
+        BurpExtender.callbacks.printError(String.format("[ERROR] %s", msg));
+    }
 
 }
