@@ -23,3 +23,9 @@ jobs:
 
     - name: Build with Gradle
       run: gradle
+
+    - name: Jar Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Extension Jar
+        path: ./build/libs/*.jar

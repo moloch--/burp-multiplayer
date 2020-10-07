@@ -25,7 +25,7 @@ public class BurpExtender implements IBurpExtender, ITab {
         BurpExtender.connectionPanel = new ConnectionPanel(BurpExtender.coverage); 
         BurpExtender.mainTabbedPane = new JTabbedPane();
         
-        // Register Us as an ITab
+        // Register us as the main ITab
         BurpExtender.callbacks.addSuiteTab(BurpExtender.this);
 
         // HTTP Listener
@@ -50,7 +50,6 @@ public class BurpExtender implements IBurpExtender, ITab {
         }
     }
 
-    
     public void logInfo(String msg) {
         BurpExtender.callbacks.printOutput(String.format("[*] %s", msg));
     }

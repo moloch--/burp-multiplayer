@@ -19,7 +19,7 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                  <Component id="jLabel4" max="32767" attributes="0"/>
+                  <Component id="header1" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
@@ -32,7 +32,7 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="projectNameTextField" min="-2" max="-2" attributes="0"/>
                           <Component id="hostnameTextField" min="-2" max="-2" attributes="0"/>
-                          <Component id="pornNumberTextField" min="-2" max="-2" attributes="0"/>
+                          <Component id="portNumberTextField" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <Component id="connectButton" max="32767" attributes="0"/>
@@ -45,7 +45,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jLabel4" min="-2" pref="16" max="-2" attributes="0"/>
+              <Component id="header1" min="-2" pref="16" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="hostnameTextField" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -54,7 +54,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="portNumberLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="pornNumberTextField" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="portNumberTextField" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -88,7 +88,7 @@
         <Property name="text" type="java.lang.String" value="Port Number"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="pornNumberTextField">
+    <Component class="javax.swing.JTextField" name="portNumberTextField">
       <Properties>
         <Property name="columns" type="int" value="10"/>
         <Property name="text" type="java.lang.String" value="28015"/>
@@ -104,7 +104,7 @@
         <Property name="columns" type="int" value="10"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel4">
+    <Component class="javax.swing.JLabel" name="header1">
       <Properties>
         <Property name="horizontalAlignment" type="int" value="0"/>
         <Property name="text" type="java.lang.String" value="Database Connection"/>

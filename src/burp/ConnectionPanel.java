@@ -33,10 +33,10 @@ public class ConnectionPanel extends javax.swing.JPanel {
         hoastnameLabel = new javax.swing.JLabel();
         hostnameTextField = new javax.swing.JTextField();
         portNumberLabel = new javax.swing.JLabel();
-        pornNumberTextField = new javax.swing.JTextField();
+        portNumberTextField = new javax.swing.JTextField();
         projectNameLabel = new javax.swing.JLabel();
         projectNameTextField = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
+        header1 = new javax.swing.JLabel();
         connectButton = new javax.swing.JButton();
 
         hoastnameLabel.setText("Hostname");
@@ -51,15 +51,15 @@ public class ConnectionPanel extends javax.swing.JPanel {
 
         portNumberLabel.setText("Port Number");
 
-        pornNumberTextField.setColumns(10);
-        pornNumberTextField.setText("28015");
+        portNumberTextField.setColumns(10);
+        portNumberTextField.setText("28015");
 
         projectNameLabel.setText("Project Name");
 
         projectNameTextField.setColumns(10);
 
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("Database Connection");
+        header1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        header1.setText("Database Connection");
 
         connectButton.setText("Connect");
         connectButton.addActionListener(new java.awt.event.ActionListener() {
@@ -75,7 +75,7 @@ public class ConnectionPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(header1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -86,7 +86,7 @@ public class ConnectionPanel extends javax.swing.JPanel {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(projectNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(hostnameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(pornNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(portNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(connectButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(425, Short.MAX_VALUE))
         );
@@ -94,7 +94,7 @@ public class ConnectionPanel extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(header1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(hostnameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -102,7 +102,7 @@ public class ConnectionPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(portNumberLabel)
-                    .addComponent(pornNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(portNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(projectNameLabel)
@@ -119,16 +119,23 @@ public class ConnectionPanel extends javax.swing.JPanel {
 
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
         // TODO add your handling code here:
+        
+        String hostname = this.hostnameTextField.getText();
+        Integer port = Integer.parseInt(this.portNumberTextField.getText());
+        String projectName = this.projectNameTextField.getText();
+        
+        this.coverage.Connect(hostname, port, projectName);
+        
     }//GEN-LAST:event_connectButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton connectButton;
+    private javax.swing.JLabel header1;
     private javax.swing.JLabel hoastnameLabel;
     private javax.swing.JTextField hostnameTextField;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JTextField pornNumberTextField;
     private javax.swing.JLabel portNumberLabel;
+    private javax.swing.JTextField portNumberTextField;
     private javax.swing.JLabel projectNameLabel;
     private javax.swing.JTextField projectNameTextField;
     // End of variables declaration//GEN-END:variables
