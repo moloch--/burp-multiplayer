@@ -6,6 +6,8 @@ import com.rethinkdb.gen.exc.ReqlDriverError;
 // import com.rethinkdb.gen.exc.ReqlQueryLogicError;
 // import com.rethinkdb.model.MapObject;
 import com.rethinkdb.net.Connection;
+import com.rethinkdb.net.Cursor;
+import java.util.List;
 
 
 public class Coverage implements IHttpListener {
@@ -27,10 +29,17 @@ public class Coverage implements IHttpListener {
             this.logWarn(String.format("Failed to connect to database: %s", err));
         }
         if (dbConn.isOpen()) {
-            this.logInfo("Successfully connected to database");
-            String[] databases = r.dbList().run(dbConn);
-            this.logInfo(String.format("Databases: %s", databases));
+            
+            this.logInfo("Successfully connected to database host");
+            
+            List<String> dbList = r.dbList().run(dbConn);
+            if (!dbList.contains(database)) {
+                this.logInfo(String.format("Database '%s' does not exist, creating ...", database));
+                r.dbCreate(database).run(dbConn);
+            }
+            
             return true;
+            
         } else {
             return false;
         }

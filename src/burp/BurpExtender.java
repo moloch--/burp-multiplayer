@@ -2,17 +2,17 @@ package burp;
 
 import java.awt.Component;
 
-import javax.swing.*;
+import javax.swing.JPanel;
+
 
 public class BurpExtender implements IBurpExtender, ITab {
 
     private static final String name = "Coverage";
     private static IBurpExtenderCallbacks callbacks;
-    private static JTabbedPane mainTabbedPane;
+    private static JPanel rootPanel;
     
     private static Coverage coverage;
-    private static Boolean isConnected = false;
-    private static ConnectionPanel connectionPanel;
+    
 
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
@@ -21,9 +21,16 @@ public class BurpExtender implements IBurpExtender, ITab {
         BurpExtender.callbacks.setExtensionName(BurpExtender.name);
         BurpExtender.coverage = new Coverage(callbacks);
         
-        // Build Root GUI Components
-        BurpExtender.connectionPanel = new ConnectionPanel(BurpExtender.coverage); 
-        BurpExtender.mainTabbedPane = new JTabbedPane();
+        // Root Panel
+        BurpExtender.rootPanel = new CoverageRootPanel();
+        
+        // ConnectionPanel
+        ConnectionPanel connectionPanel = new ConnectionPanel(BurpExtender.coverage);
+        BurpExtender.rootPanel.add(connectionPanel);  
+        connectionPanel.onConnection(() -> {
+            this.logInfo("Connection callback!");
+            BurpExtender.rootPanel.remove(connectionPanel);
+        });
         
         // Register us as the main ITab
         BurpExtender.callbacks.addSuiteTab(BurpExtender.this);
@@ -41,13 +48,7 @@ public class BurpExtender implements IBurpExtender, ITab {
 
     @Override
     public Component getUiComponent() {
-        if (BurpExtender.isConnected) {
-            this.logInfo("Connected to database, loading main GUI");
-            return mainTabbedPane;
-        } else {
-            this.logInfo("Not connected to database, loading connection panel");
-            return connectionPanel;
-        }
+        return rootPanel;
     }
 
     // Loggers
