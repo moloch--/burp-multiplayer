@@ -1,5 +1,8 @@
 package burp;
 
+import burp.gui.CoverageRootPanel;
+import burp.gui.ConnectionPanel;
+import burp.gui.MainPanel;
 import java.awt.Component;
 
 import javax.swing.JPanel;
@@ -28,17 +31,21 @@ public class BurpExtender implements IBurpExtender, ITab {
         ConnectionPanel connectionPanel = new ConnectionPanel(BurpExtender.coverage);
         BurpExtender.rootPanel.add(connectionPanel);  
         connectionPanel.onConnection(() -> {
-            this.logInfo("Connection callback!");
             BurpExtender.rootPanel.remove(connectionPanel);
+            
+            MainPanel mainPanel = new MainPanel(BurpExtender.coverage);
+            BurpExtender.rootPanel.add(mainPanel);
+            
+            // HTTP Listener
+            BurpExtender.coverage = new Coverage(BurpExtender.callbacks);
+            BurpExtender.callbacks.registerHttpListener(coverage);
+            
+            BurpExtender.rootPanel.repaint();
+            BurpExtender.rootPanel.revalidate();
         });
         
         // Register us as the main ITab
         BurpExtender.callbacks.addSuiteTab(BurpExtender.this);
-
-        // HTTP Listener
-        BurpExtender.coverage = new Coverage(BurpExtender.callbacks);
-        BurpExtender.callbacks.registerHttpListener(coverage);
-
     }
 
     @Override
