@@ -23,7 +23,10 @@ public class MainPanel extends javax.swing.JPanel {
         this.coverage = coverage;
         
         InScopePane inScopePane = new InScopePane(coverage);
-        this.mainTabbedPane.addTab("Scope", inScopePane);
+        this.mainTabbedPane.addTab("In-Scope", inScopePane);
+        
+        OptionsPane optionsPane = new OptionsPane();
+        this.mainTabbedPane.addTab("Options", optionsPane);
     }
 
     /**

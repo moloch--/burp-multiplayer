@@ -7,7 +7,10 @@ import java.awt.Component;
 
 import javax.swing.JPanel;
 
-
+/**
+ *
+ * @author moloch
+ */
 public class BurpExtender implements IBurpExtender, ITab {
 
     private static final String name = "Coverage";
@@ -15,7 +18,6 @@ public class BurpExtender implements IBurpExtender, ITab {
     private static JPanel rootPanel;
     
     private static Coverage coverage;
-    
 
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
@@ -37,7 +39,6 @@ public class BurpExtender implements IBurpExtender, ITab {
             BurpExtender.rootPanel.add(mainPanel);
             
             // HTTP Listener
-            BurpExtender.coverage = new Coverage(BurpExtender.callbacks);
             BurpExtender.callbacks.registerHttpListener(coverage);
             
             BurpExtender.rootPanel.repaint();
