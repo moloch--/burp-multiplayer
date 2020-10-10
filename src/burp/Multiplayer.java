@@ -37,7 +37,7 @@ public class Multiplayer implements IHttpListener {
 
     // Constructor
     public Multiplayer(IBurpExtenderCallbacks callbacks) {
-        this.history = new HTTPHistory(executor);
+        this.history = new HTTPHistory(executor, callbacks);
         this.callbacks = callbacks;
         this.helpers = callbacks.getHelpers();
     }
@@ -100,7 +100,8 @@ public class Multiplayer implements IHttpListener {
         while (historyCursor.hasNext()) {
             HashMap entry = historyCursor.next();
             logInfo(String.format("+ %s", entry.get("id")));
-            MultiplayerRequestResponse reqResp = new MultiplayerRequestResponse(entry, callbacks);         
+            MultiplayerRequestResponse reqResp = new MultiplayerRequestResponse(entry, callbacks);
+            logInfo("Put ->");
             history.put(reqResp.getId(), reqResp);
         }
         logInfo("History initialized");

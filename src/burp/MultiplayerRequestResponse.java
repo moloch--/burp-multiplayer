@@ -40,6 +40,30 @@ public class MultiplayerRequestResponse implements IHttpRequestResponse {
         return id;
     }
     
+    public Object getProperty(String name) {
+        
+        switch (name.toLowerCase()) {
+            case "id":
+                return id;
+            case "protocol":
+                return this.getURL().getProtocol();
+            case "domain":
+                return this.getURL().getHost();
+            case "path":
+                return this.getURL().getPath();
+            case "port":
+                return this.getURL().getPort();
+            case "highlight":
+                return this.highlight;
+            case "comment":
+                return this.comment;
+            case "time":
+                return 1;
+        }
+        
+        return null;
+    }
+    
     public IRequestInfo getRequestInfo() {
         return helpers.analyzeRequest(this);
     }

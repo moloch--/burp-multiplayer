@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
@@ -21,7 +22,10 @@ import javax.swing.table.TableModel;
  */
 public class HTTPHistory implements TableModel {
     
-    private final List<ChangeCallback> changeCallbacks = new ArrayList();
+    public static final String[] columns = {
+        "Protocol", "Domain", "Path", "Status", "Time"
+    }; 
+    
     private final List<TableModelListener> tableListenerCallbacks = new ArrayList();
     private final ExecutorService executor;
     private final LinkedHashMap<String, MultiplayerRequestResponse> history;
@@ -29,19 +33,30 @@ public class HTTPHistory implements TableModel {
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final Lock readLock = readWriteLock.readLock();
     private final Lock writeLock = readWriteLock.writeLock();
+    
+    private IBurpExtenderCallbacks callbacks;
 
-    public HTTPHistory(ExecutorService executor) {
-        this.history = new LinkedHashMap();
+    public HTTPHistory(ExecutorService executor, IBurpExtenderCallbacks callbacks) {
+        history = new LinkedHashMap();
         this.executor = executor;
+        this.callbacks = callbacks;
     }
     
     public void put(String id, MultiplayerRequestResponse reqResp) {
         writeLock.lock();
         try {
-            MultiplayerRequestResponse value = history.put(id, reqResp);
-            changeCallbacks.forEach(callback -> {
-                executor.submit(() -> callback.onChange(value.getId()));
-            });
+
+            history.put(id, reqResp);
+
+            // int rowNumber = getRowNumberOfId(id);
+
+            TableModelEvent event = new TableModelEvent(this);
+
+//            tableListenerCallbacks.forEach(listener -> {
+//                callbacks.printOutput("5");
+//                executor.submit(() -> listener.tableChanged(event));
+//            });
+
         } finally {
             writeLock.unlock();
         }
@@ -57,8 +72,19 @@ public class HTTPHistory implements TableModel {
         }
     }
     
-    public void registerOnChangeCallback(ChangeCallback callback) {
-        changeCallbacks.add(callback);
+    private int getRowNumberOfId(String id) {
+        readLock.lock();
+        try {
+            String[] keys = (String[]) history.keySet().toArray();
+            for (int index = 0; index < keys.length; ++index) {
+                if (id.equals(keys[index])) {
+                    return index;
+                }
+            }
+            return -1;
+        } finally {
+            readLock.unlock();
+        }
     }
 
     @Override
@@ -74,12 +100,12 @@ public class HTTPHistory implements TableModel {
 
     @Override
     public int getColumnCount() {
-        return 1;
+        return columns.length;
     }
 
     @Override
     public String getColumnName(int columnIndex) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return columns[columnIndex];
     }
 
     @Override
@@ -94,7 +120,15 @@ public class HTTPHistory implements TableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        readLock.lock();
+        try {
+            String rowKey = (String) history.keySet().toArray()[columnIndex];
+            MultiplayerRequestResponse reqResp = history.get(rowKey);
+            String columnName = columns[columnIndex];
+            return reqResp.getProperty(columnName);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     @Override

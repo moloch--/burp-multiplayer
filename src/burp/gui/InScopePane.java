@@ -8,12 +8,14 @@ package burp.gui;
 import burp.ChangeCallback;
 import burp.Multiplayer;
 import burp.MultiplayerRequestResponse;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 /**
  *
  * @author moloch
  */
-public class InScopePane extends javax.swing.JPanel implements ChangeCallback {
+public class InScopePane extends javax.swing.JPanel {
 
     private Multiplayer multiplayer;
     
@@ -23,13 +25,8 @@ public class InScopePane extends javax.swing.JPanel implements ChangeCallback {
     public InScopePane(Multiplayer multiplayer) {
         this.multiplayer = multiplayer;
         initComponents();
-        this.multiplayer.history.registerOnChangeCallback(this);
-        
-    }
-
-    @Override
-    public void onChange(String reqRespId) {
-        
+        workTable.setModel(this.multiplayer.history);
+        this.multiplayer.history.addTableModelListener(workTable);
     }
 
     /**
@@ -47,20 +44,21 @@ public class InScopePane extends javax.swing.JPanel implements ChangeCallback {
 
         workTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "Domain", "Path", "Status", "Protocol", "Size", "Time"
+                "Procotol", "Domain", "Path", "Status", "Time"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, true
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -107,5 +105,6 @@ public class InScopePane extends javax.swing.JPanel implements ChangeCallback {
     private javax.swing.JToggleButton syncToggleButton;
     private javax.swing.JTable workTable;
     // End of variables declaration//GEN-END:variables
+
 
 }
