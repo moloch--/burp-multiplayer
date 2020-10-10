@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker run -p 8080:8080 -p 28015:28015 -p 29015:29015 --name coverage-rethink -v "$PWD:/data" -d rethinkdb
+docker run -p 127.0.0.1:8080:8080 -p 127.0.0.1:28015:28015 -p 127.0.0.1:29015:29015 --name rethinkdb -v "$PWD:/data" -d rethinkdb
