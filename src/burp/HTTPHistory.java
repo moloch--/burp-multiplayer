@@ -6,6 +6,7 @@
 package burp;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
@@ -43,9 +44,8 @@ public class HTTPHistory extends AbstractTableModel {
     
     public void add(MultiplayerRequestResponse reqResp) {
         history.add(reqResp);
-        TableModelEvent event = new TableModelEvent(this);
+        TableModelEvent event = new TableModelEvent(this); // TODO: Don't refresh the entire table
         tableListenerCallbacks.forEach(listener -> {
-            callbacks.printOutput("Table Changed!");
             executor.submit(() -> listener.tableChanged(event));
         });
     }
@@ -74,12 +74,24 @@ public class HTTPHistory extends AbstractTableModel {
     public void removeTableModelListener(TableModelListener callback) {
         tableListenerCallbacks.remove(callback);
     }
+    
+    public MultiplayerRequestResponse getRowAt(int rowIndex) {
+        Iterator<MultiplayerRequestResponse> iter = history.iterator();
+        for (int index = 0; index < rowIndex; ++index) {
+            iter.next();
+        }
+        return iter.next();
+    }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        callbacks.printOutput(String.format("getValueAt->%d,%d", rowIndex, columnIndex));
-        MultiplayerRequestResponse reqResp = history.toArray(new MultiplayerRequestResponse[history.size()])[rowIndex];
-        callbacks.printOutput(String.format("Got: %s (want: %s)", reqResp, columns[columnIndex]));
+        Iterator<MultiplayerRequestResponse> iter = history.iterator();
+        for (int index = 0; index < rowIndex; ++index) {
+            iter.next();
+        }
+        MultiplayerRequestResponse reqResp = iter.next();
+        
+        // callbacks.printOutput(String.format("Got: %s (want: %s)", reqResp, columns[columnIndex]));
         switch(columns[columnIndex]) {
             case Method:
                 return reqResp.getMethod();

@@ -5,7 +5,12 @@
  */
 package burp.gui;
 
+import burp.HTTPMessageEditor;
+import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
+import burp.MultiplayerRequestResponse;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 
 /**
@@ -15,14 +20,38 @@ import burp.Multiplayer;
 public class InScopePane extends javax.swing.JPanel {
 
     private Multiplayer multiplayer;
+    private IBurpExtenderCallbacks callbacks;
+    private ListSelectionListener rowSelectionListener;
     
     /**
      * Creates new form InScopePane
      */
-    public InScopePane(Multiplayer multiplayer) {
+    public InScopePane(Multiplayer multiplayer, IBurpExtenderCallbacks callbacks) {
+        this.callbacks = callbacks;
         this.multiplayer = multiplayer;
         initComponents();
-        this.multiplayer.history.addTableModelListener(workTable);
+        this.multiplayer.history.addTableModelListener(inScopeTable);
+        
+        // Row Selection Listener
+        rowSelectionListener = new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent event) {
+                if (!event.getValueIsAdjusting()) {
+                    MultiplayerRequestResponse reqResp = multiplayer.history.getRowAt(inScopeTable.getSelectedRow());
+                    displayMessageEditorFor(reqResp);
+                }            
+            }
+        };
+        inScopeTable.getSelectionModel().addListSelectionListener(rowSelectionListener);
+    }
+    
+    public void displayMessageEditorFor(MultiplayerRequestResponse reqResp) {
+        callbacks.printOutput(String.format("Selected: %s", reqResp.getId()));
+        
+        bottomTabbedPane.removeAll();
+        
+        HTTPMessageEditor editor = new HTTPMessageEditor(reqResp, callbacks);
+        bottomTabbedPane.addTab("Request", editor.getRequestEditor().getComponent());
+        bottomTabbedPane.addTab("Response", editor.getResponseEditor().getComponent());
     }
 
     /**
@@ -34,19 +63,26 @@ public class InScopePane extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        workTable = new javax.swing.JTable(this.multiplayer.history);
-        syncToggleButton = new javax.swing.JToggleButton();
+        parentSplitPane = new javax.swing.JSplitPane();
+        inScopeTablePane = new javax.swing.JScrollPane();
+        inScopeTable = new javax.swing.JTable(this.multiplayer.history);
+        bottomTabbedPane = new javax.swing.JTabbedPane();
+        jButton1 = new javax.swing.JButton();
 
-        workTable.setColumnSelectionAllowed(true);
-        workTable.setEnabled(false);
-        workTable.setFillsViewportHeight(true);
-        workTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        workTable.setShowHorizontalLines(true);
-        jScrollPane1.setViewportView(workTable);
-        workTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        parentSplitPane.setDividerSize(4);
+        parentSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
-        syncToggleButton.setText("Pause Sync");
+        inScopeTable.setColumnSelectionAllowed(true);
+        inScopeTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        inScopeTable.setRowSelectionAllowed(true);
+        inScopeTable.setColumnSelectionAllowed(false);
+        inScopeTablePane.setViewportView(inScopeTable);
+        inScopeTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+
+        parentSplitPane.setTopComponent(inScopeTablePane);
+        parentSplitPane.setRightComponent(bottomTabbedPane);
+
+        jButton1.setText("jButton1");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -55,28 +91,29 @@ public class InScopePane extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 621, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(syncToggleButton)))
-                .addContainerGap())
+                    .addComponent(parentSplitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 962, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton1)
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(syncToggleButton)
-                .addGap(66, 66, 66)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(117, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(jButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(parentSplitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 682, Short.MAX_VALUE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JToggleButton syncToggleButton;
-    private javax.swing.JTable workTable;
+    private javax.swing.JTabbedPane bottomTabbedPane;
+    private javax.swing.JTable inScopeTable;
+    private javax.swing.JScrollPane inScopeTablePane;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JSplitPane parentSplitPane;
     // End of variables declaration//GEN-END:variables
 
 
