@@ -16,7 +16,7 @@ public class BurpExtender implements IBurpExtender, ITab {
     private static final String name = "Multiplayer";
     private static IBurpExtenderCallbacks callbacks;
     private static JPanel rootPanel;
-    
+
     private static Multiplayer multiplayer;
 
     @Override
@@ -25,26 +25,26 @@ public class BurpExtender implements IBurpExtender, ITab {
         this.logInfo("Multiplayer plugin loading ...");
         BurpExtender.callbacks.setExtensionName(BurpExtender.name);
         BurpExtender.multiplayer = new Multiplayer(callbacks);
-        
+
         // Root Panel
         BurpExtender.rootPanel = new MultiplayerRootPanel();
-        
+
         // ConnectionPanel
         ConnectionPanel connectionPanel = new ConnectionPanel(BurpExtender.multiplayer);
-        BurpExtender.rootPanel.add(connectionPanel);  
+        BurpExtender.rootPanel.add(connectionPanel);
         connectionPanel.onConnection(() -> {
             BurpExtender.rootPanel.remove(connectionPanel);
-            
-            MainPanel mainPanel = new MainPanel(BurpExtender.multiplayer);
+
+            MainPanel mainPanel = new MainPanel(BurpExtender.multiplayer, BurpExtender.callbacks);
             BurpExtender.rootPanel.add(mainPanel);
-            
+
             // HTTP Listener
             BurpExtender.callbacks.registerHttpListener(multiplayer);
-            
+
             BurpExtender.rootPanel.repaint();
             BurpExtender.rootPanel.revalidate();
         });
-        
+
         // Register us as the main ITab
         BurpExtender.callbacks.addSuiteTab(BurpExtender.this);
     }
@@ -63,11 +63,11 @@ public class BurpExtender implements IBurpExtender, ITab {
     public void logInfo(String msg) {
         BurpExtender.callbacks.printOutput(String.format("[*] %s", msg));
     }
-    
+
     public void logWarn(String msg) {
         BurpExtender.callbacks.printOutput(String.format("[!] %s", msg));
     }
-    
+
     public void logError(String msg) {
         BurpExtender.callbacks.printError(String.format("[ERROR] %s", msg));
     }

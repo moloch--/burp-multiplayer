@@ -6,13 +6,12 @@
 package burp;
 
 import java.net.URL;
-import java.util.HashMap;
 
 /**
  *
  * @author moloch
  */
-public class MultiplayerRequestResponse implements IHttpRequestResponse {
+public class MultiplayerRequestResponse implements IHttpRequestResponse, Comparable<MultiplayerRequestResponse>  {
     
     private String id;
     
@@ -20,60 +19,56 @@ public class MultiplayerRequestResponse implements IHttpRequestResponse {
     private byte[] response;
     private String comment;
     private String highlight;
-    private IHttpService httpService;
+    private String method;
+    private String path;
+    private int status;
+
+    private MultiplayerHttpService httpService = new MultiplayerHttpService();
+
+    public IRequestInfo getRequestInfo(IExtensionHelpers helpers) {
+        IRequestInfo info = helpers.analyzeRequest(this);
+        return info;
+    }
     
-    private IBurpExtenderCallbacks callbacks;
-    private IExtensionHelpers helpers;
+    public IResponseInfo getResponseInfo(IExtensionHelpers helpers) {
+        return helpers.analyzeResponse(this.getResponse());
+    }
     
-    public MultiplayerRequestResponse(HashMap entry, IBurpExtenderCallbacks callbacks) {
-        this.callbacks = callbacks;
-        this.helpers = this.callbacks.getHelpers();
-        
-        this.id = (String) entry.get("id");
-        this.comment = (String) entry.get("comment");
-        this.highlight = (String) entry.get("highlight");
-        this.request = helpers.base64Decode((String) entry.get("request"));
-        this.response = helpers.base64Decode((String) entry.get("response"));
+    public URL getURL(IExtensionHelpers helpers) {
+        return getRequestInfo(helpers).getUrl();
+    }
+    
+    /* Getters & Setters */
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getId() {
         return id;
     }
     
-    public Object getProperty(String name) {
-        
-        switch (name.toLowerCase()) {
-            case "id":
-                return id;
-            case "protocol":
-                return this.getURL().getProtocol();
-            case "domain":
-                return this.getURL().getHost();
-            case "path":
-                return this.getURL().getPath();
-            case "port":
-                return this.getURL().getPort();
-            case "highlight":
-                return this.highlight;
-            case "comment":
-                return this.comment;
-            case "time":
-                return 1;
-        }
-        
-        return null;
+    public void setMethod(String method) {
+        this.method = method;
     }
     
-    public IRequestInfo getRequestInfo() {
-        return helpers.analyzeRequest(this);
+    public String getMethod() {
+        return method;
     }
     
-    public IResponseInfo getResponseInfo() {
-        return helpers.analyzeResponse(this.getResponse());
+    public void setPath(String path) {
+        this.path = path;
     }
     
-    public URL getURL() {
-        return getRequestInfo().getUrl();
+    public String getPath() {
+        return path;
+    }
+    
+    public void setStatus(int status) {
+        this.status = status;
+    }
+    
+    public int getStatus() {
+        return status;
     }
     
     // Interface Methods
@@ -124,7 +119,51 @@ public class MultiplayerRequestResponse implements IHttpRequestResponse {
 
     @Override
     public void setHttpService(IHttpService httpService) {
-        this.httpService = httpService;
+        this.httpService = new MultiplayerHttpService();
+        this.httpService.setHost(httpService.getHost());
+        this.httpService.setPort(httpService.getPort());
+        this.httpService.setProtocol(httpService.getProtocol());
     }
     
+    public void setHost(String host) {
+        httpService.setHost(host);
+    }
+    
+    public String getHost() {
+        return httpService.getHost();
+    }
+    
+    public void setPort(int port) {
+        httpService.setPort(port);
+    }
+
+    public int getPort() {
+        return httpService.getPort();
+    }
+
+    public void setProtocol(String protocol) {
+        httpService.setProtocol(protocol);
+    }
+
+    public String getProtocol() {
+        return httpService.getProtocol();
+    }
+
+    @Override
+    public int compareTo(MultiplayerRequestResponse other) {
+        if (other.id.equals(this.id)) {
+            return 0;
+        }
+        return other.hashCode() - this.hashCode();
+    }
+    
+    public boolean equals(MultiplayerRequestResponse other) {
+        return other.id.equals(this.id);
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("<id: %s, method: %s, protocol: %s, host: %s, port: %d, path: %s, comment: %s>", 
+                id, method, getProtocol(), getHost(), getPort(), getPath(), comment);
+    }
 }

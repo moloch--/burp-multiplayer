@@ -5,6 +5,7 @@
  */
 package burp.gui;
 
+import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
 
 /**
@@ -14,14 +15,17 @@ import burp.Multiplayer;
 public class MainPanel extends javax.swing.JPanel {
 
     private Multiplayer multiplayer;
+    private IBurpExtenderCallbacks callbacks;
     
     /**
      * Creates new form MainPanel
      */
-    public MainPanel(Multiplayer multiplayer) {
+    public MainPanel(Multiplayer multiplayer, IBurpExtenderCallbacks callbacks) {
+        this.callbacks = callbacks;
         initComponents();
         this.multiplayer = multiplayer;
         
+        callbacks.printOutput("Creating in-scope pane ...");
         InScopePane inScopePane = new InScopePane(multiplayer);
         this.mainTabbedPane.addTab("In-Scope", inScopePane);
         

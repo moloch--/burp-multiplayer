@@ -13,7 +13,12 @@ repositories {
 
 dependencies {
     compile 'net.portswigger.burp.extender:burp-extender-api:2.1'
-    compile group: 'com.rethinkdb', name: 'rethinkdb-driver', version: '2.3.3'
+    
+    compile 'com.fasterxml.jackson.core:jackson-core:2.4.1'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.4.1'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.4.1'
+    
+    compile group: 'com.rethinkdb', name: 'rethinkdb-driver', version: '2.4.1'
 }
 
 sourceSets {

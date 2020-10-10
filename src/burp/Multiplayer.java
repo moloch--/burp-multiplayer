@@ -1,15 +1,15 @@
 package burp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rethinkdb.RethinkDB;
 import com.rethinkdb.gen.ast.Table;
 import com.rethinkdb.gen.exc.ReqlDriverError;
 import com.rethinkdb.model.MapObject;
 import com.rethinkdb.net.Connection;
-import com.rethinkdb.net.Cursor;
+import com.rethinkdb.net.Result;
 
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -53,7 +53,9 @@ public class Multiplayer implements IHttpListener {
         if (dbConn.isOpen()) {
             logInfo(String.format("Successfully connected: %s", dbConn));
             dbName = database;
-            List<String> dbList = r.dbList().run(dbConn);
+            
+            Result<Object> result = r.dbList().run(dbConn);
+            ArrayList<String> dbList = (ArrayList<String>) result.single();
             if (!dbList.contains(dbName)) {
                 createDatabase();
             }
@@ -61,12 +63,13 @@ public class Multiplayer implements IHttpListener {
             initalizeHistory();
             
             executor.submit(() -> {
-                Cursor<HashMap> changeCursor = http().changes().run(dbConn);
-                for (HashMap change : changeCursor) {
-                    HashMap entry = (HashMap) change.get("new_val");
-                    MultiplayerRequestResponse reqResp = new MultiplayerRequestResponse(entry, callbacks);
-                    history.put(reqResp.getId(), reqResp);
-                }
+                Result<Object> changeResult = http().changes().run(dbConn);
+                logInfo(String.format("(%s) %s", changeResult.getClass(), changeResult));
+//                for (HashMap change : changeCursor) {
+//                    HashMap entry = (HashMap) change.get("new_val");
+//                    MultiplayerRequestResponse reqResp = new MultiplayerRequestResponse(entry, callbacks);
+//                    history.add(reqResp);
+//                }
             });
             
             return true;
@@ -96,15 +99,16 @@ public class Multiplayer implements IHttpListener {
     
     private void initalizeHistory() {
         logInfo("Initializing history ...");
-        Cursor<HashMap> historyCursor = http().run(dbConn);
-        while (historyCursor.hasNext()) {
-            HashMap entry = historyCursor.next();
-            logInfo(String.format("+ %s", entry.get("id")));
-            MultiplayerRequestResponse reqResp = new MultiplayerRequestResponse(entry, callbacks);
-            logInfo("Put ->");
-            history.put(reqResp.getId(), reqResp);
+        Result<MultiplayerRequestResponse> result = http().run(dbConn, MultiplayerRequestResponse.class);
+        while (result.hasNext()) {
+            MultiplayerRequestResponse entry = result.next();
+            logInfo(String.format("+ %s", entry));
+            history.add(entry);
         }
         logInfo("History initialized");
+        
+        String value = (String) history.getValueAt(0, 0);
+        logInfo(String.format("0,0 = %s", value));
     }
     
     public Boolean IsConnected() {
@@ -178,8 +182,8 @@ public class Multiplayer implements IHttpListener {
             .with("status", respInfo.getStatusCode())
             .with("comment", "")
             .with("highlight", "")
-            .with("request", helpers.base64Encode(reqResp.getRequest()))
-            .with("response", helpers.base64Encode(reqResp.getResponse()));
+            .with("request", r.binary(reqResp.getRequest()))
+            .with("response", r.binary(reqResp.getResponse()));
     }
     
     // Creates an ID for a req/resp object (METHOD>PROTOCOL>AUTHORITY>PATH)

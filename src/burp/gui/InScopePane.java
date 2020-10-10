@@ -8,6 +8,7 @@ package burp.gui;
 import burp.ChangeCallback;
 import burp.Multiplayer;
 import burp.MultiplayerRequestResponse;
+import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
@@ -25,8 +26,7 @@ public class InScopePane extends javax.swing.JPanel {
     public InScopePane(Multiplayer multiplayer) {
         this.multiplayer = multiplayer;
         initComponents();
-        workTable.setModel(this.multiplayer.history);
-        this.multiplayer.history.addTableModelListener(workTable);
+        // this.multiplayer.history.addTableModelListener(workTable);
     }
 
     /**
@@ -42,34 +42,11 @@ public class InScopePane extends javax.swing.JPanel {
         workTable = new javax.swing.JTable();
         syncToggleButton = new javax.swing.JToggleButton();
 
-        workTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null}
-            },
-            new String [] {
-                "Procotol", "Domain", "Path", "Status", "Time"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, true
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
         workTable.setColumnSelectionAllowed(true);
+        workTable.setEnabled(false);
+        workTable.setFillsViewportHeight(true);
+        workTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        workTable.setShowHorizontalLines(true);
         jScrollPane1.setViewportView(workTable);
         workTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
