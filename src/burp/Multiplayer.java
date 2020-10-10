@@ -63,13 +63,11 @@ public class Multiplayer implements IHttpListener {
             initalizeHistory();
             
             executor.submit(() -> {
-                Result<Object> changeResult = http().changes().run(dbConn);
-                logInfo(String.format("(%s) %s", changeResult.getClass(), changeResult));
-//                for (HashMap change : changeCursor) {
-//                    HashMap entry = (HashMap) change.get("new_val");
-//                    MultiplayerRequestResponse reqResp = new MultiplayerRequestResponse(entry, callbacks);
-//                    history.add(reqResp);
-//                }
+                Result<MultiplayerRequestResponse> changes = http().changes().getField("new_val").run(dbConn, MultiplayerRequestResponse.class);
+                for (MultiplayerRequestResponse reqResp : changes) {
+                    logInfo("ChangeFeed trigger!");
+                    history.add(reqResp);
+                }
             });
             
             return true;
@@ -106,9 +104,6 @@ public class Multiplayer implements IHttpListener {
             history.add(entry);
         }
         logInfo("History initialized");
-        
-        String value = (String) history.getValueAt(0, 0);
-        logInfo(String.format("0,0 = %s", value));
     }
     
     public Boolean IsConnected() {

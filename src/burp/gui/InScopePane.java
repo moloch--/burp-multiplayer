@@ -5,12 +5,8 @@
  */
 package burp.gui;
 
-import burp.ChangeCallback;
 import burp.Multiplayer;
-import burp.MultiplayerRequestResponse;
-import javax.swing.JTable;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
+
 
 /**
  *
@@ -26,7 +22,7 @@ public class InScopePane extends javax.swing.JPanel {
     public InScopePane(Multiplayer multiplayer) {
         this.multiplayer = multiplayer;
         initComponents();
-        // this.multiplayer.history.addTableModelListener(workTable);
+        this.multiplayer.history.addTableModelListener(workTable);
     }
 
     /**
@@ -39,7 +35,7 @@ public class InScopePane extends javax.swing.JPanel {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        workTable = new javax.swing.JTable();
+        workTable = new javax.swing.JTable(this.multiplayer.history);
         syncToggleButton = new javax.swing.JToggleButton();
 
         workTable.setColumnSelectionAllowed(true);

@@ -24,7 +24,6 @@ public class HTTPHistory extends AbstractTableModel {
     private final List<TableModelListener> tableListenerCallbacks = new ArrayList();
     private final ExecutorService executor;
     
-    
     public static final String Method = "Method";
     public static final String Protocol = "Protocol";
     public static final String Host = "Host";
@@ -53,25 +52,21 @@ public class HTTPHistory extends AbstractTableModel {
     
     @Override
     public int getRowCount() {
-        // callbacks.printOutput(String.format("getRowCount->%d", history.size()));
         return history.size();
     }
 
     @Override
     public int getColumnCount() {
-        callbacks.printOutput(String.format("getColumnCount", columns.length));
         return columns.length;
     }
 
     @Override
     public String getColumnName(int columnIndex) {
-        callbacks.printOutput(String.format("getColumnName->%s", columns[columnIndex]));
         return columns[columnIndex];
     }
     
     @Override
     public void addTableModelListener(TableModelListener callback) {
-        callbacks.printOutput("addTableModelListener");
         tableListenerCallbacks.add(callback);
     }
      
@@ -104,14 +99,11 @@ public class HTTPHistory extends AbstractTableModel {
     
     @Override
     public Class getColumnClass(int columnIndex) {
-        Class klass = getValueAt(0, columnIndex).getClass();
-        callbacks.printOutput(String.format("getColumnClass->%d <-%s", columnIndex, klass));
-        return klass;
+        return getValueAt(0, columnIndex).getClass();
     }
     
     @Override
     public boolean isCellEditable(int row, int col) {
-        callbacks.printOutput("isCellEditable");
         return false;
     }
 
