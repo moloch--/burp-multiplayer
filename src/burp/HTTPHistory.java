@@ -6,8 +6,11 @@
 package burp;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import javax.swing.event.TableModelEvent;
@@ -25,6 +28,7 @@ public class HTTPHistory extends AbstractTableModel {
     private final List<TableModelListener> tableListenerCallbacks = new ArrayList();
     private final ExecutorService executor;
     
+    public static final String ID = "ID";
     public static final String Method = "Method";
     public static final String Protocol = "Protocol";
     public static final String Host = "Host";
@@ -32,7 +36,7 @@ public class HTTPHistory extends AbstractTableModel {
     public static final String Port = "Port";
     public static final String StatusCode = "Status Code";
     public static final String[] columns = {
-        Method, Protocol, Host, Path, Port, StatusCode
+        ID, Method, Protocol, Host, Path, Port, StatusCode
     };
     private final ConcurrentSkipListSet<MultiplayerRequestResponse> history;
     
@@ -75,12 +79,16 @@ public class HTTPHistory extends AbstractTableModel {
         tableListenerCallbacks.remove(callback);
     }
     
-    public MultiplayerRequestResponse getRowAt(int rowIndex) {
+    public MultiplayerRequestResponse getById(String reqRespId) {
+        // Linear search, yea yea it's terrible    
         Iterator<MultiplayerRequestResponse> iter = history.iterator();
-        for (int index = 0; index < rowIndex; ++index) {
-            iter.next();
+        while (iter.hasNext()) {
+            MultiplayerRequestResponse reqResp = iter.next();
+            if (reqResp.getId().equals(reqRespId)) {
+                return reqResp;
+            }
         }
-        return iter.next();
+        return null;
     }
 
     @Override
@@ -90,9 +98,10 @@ public class HTTPHistory extends AbstractTableModel {
             iter.next();
         }
         MultiplayerRequestResponse reqResp = iter.next();
-        
-        // callbacks.printOutput(String.format("Got: %s (want: %s)", reqResp, columns[columnIndex]));
+
         switch(columns[columnIndex]) {
+            case ID:
+                return reqResp.getId();
             case Method:
                 return reqResp.getMethod();
             case Protocol:

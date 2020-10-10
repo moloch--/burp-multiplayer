@@ -66,7 +66,7 @@
                   <TableColumnModel selectionModel="1"/>
                 </Property>
                 <Property name="columnSelectionAllowed" type="boolean" value="true"/>
-                <Property name="selectionMode" type="int" value="0" postCode="inScopeTable.setRowSelectionAllowed(true);&#xa;inScopeTable.setColumnSelectionAllowed(false);"/>
+                <Property name="selectionMode" type="int" value="0" postCode="inScopeTable.setRowSelectionAllowed(true);&#xa;inScopeTable.setColumnSelectionAllowed(false);&#xa;inScopeTable.setAutoCreateRowSorter(true);"/>
                 <Property name="tableHeader" type="javax.swing.table.JTableHeader" editor="org.netbeans.modules.form.editors2.JTableHeaderEditor">
                   <TableHeader reorderingAllowed="true" resizingAllowed="true"/>
                 </Property>

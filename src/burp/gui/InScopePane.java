@@ -11,6 +11,7 @@ import burp.Multiplayer;
 import burp.MultiplayerRequestResponse;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableColumnModel;
 
 
 /**
@@ -30,22 +31,28 @@ public class InScopePane extends javax.swing.JPanel {
         this.callbacks = callbacks;
         this.multiplayer = multiplayer;
         initComponents();
+        
+        // Hide ID column
+        inScopeTable.getColumnModel().getColumn(0).setMinWidth(0);
+        inScopeTable.getColumnModel().getColumn(0).setMaxWidth(0);
+
         this.multiplayer.history.addTableModelListener(inScopeTable);
         
         // Row Selection Listener
         rowSelectionListener = new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent event) {
                 if (!event.getValueIsAdjusting()) {
-                    MultiplayerRequestResponse reqResp = multiplayer.history.getRowAt(inScopeTable.getSelectedRow());
-                    displayMessageEditorFor(reqResp);
-                }            
+                    String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
+                    displayMessageEditorFor(reqRespId);
+                }
             }
         };
         inScopeTable.getSelectionModel().addListSelectionListener(rowSelectionListener);
     }
     
-    public void displayMessageEditorFor(MultiplayerRequestResponse reqResp) {
-        callbacks.printOutput(String.format("Selected: %s", reqResp.getId()));
+    public void displayMessageEditorFor(String reqRespId) {
+        callbacks.printOutput(String.format("Selected: %s", reqRespId));
+        MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
         
         bottomTabbedPane.removeAll();
         
@@ -75,6 +82,7 @@ public class InScopePane extends javax.swing.JPanel {
         inScopeTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         inScopeTable.setRowSelectionAllowed(true);
         inScopeTable.setColumnSelectionAllowed(false);
+        inScopeTable.setAutoCreateRowSorter(true);
         inScopeTablePane.setViewportView(inScopeTable);
         inScopeTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
