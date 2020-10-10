@@ -1,6 +1,6 @@
 package burp;
 
-import burp.gui.CoverageRootPanel;
+import burp.gui.MultiplayerRootPanel;
 import burp.gui.ConnectionPanel;
 import burp.gui.MainPanel;
 import java.awt.Component;
@@ -13,33 +13,33 @@ import javax.swing.JPanel;
  */
 public class BurpExtender implements IBurpExtender, ITab {
 
-    private static final String name = "Coverage";
+    private static final String name = "Multiplayer";
     private static IBurpExtenderCallbacks callbacks;
     private static JPanel rootPanel;
     
-    private static Coverage coverage;
+    private static Multiplayer multiplayer;
 
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
         BurpExtender.callbacks = callbacks;
-        this.logInfo("Coverage plugin loading ...");
+        this.logInfo("Multiplayer plugin loading ...");
         BurpExtender.callbacks.setExtensionName(BurpExtender.name);
-        BurpExtender.coverage = new Coverage(callbacks);
+        BurpExtender.multiplayer = new Multiplayer(callbacks);
         
         // Root Panel
-        BurpExtender.rootPanel = new CoverageRootPanel();
+        BurpExtender.rootPanel = new MultiplayerRootPanel();
         
         // ConnectionPanel
-        ConnectionPanel connectionPanel = new ConnectionPanel(BurpExtender.coverage);
+        ConnectionPanel connectionPanel = new ConnectionPanel(BurpExtender.multiplayer);
         BurpExtender.rootPanel.add(connectionPanel);  
         connectionPanel.onConnection(() -> {
             BurpExtender.rootPanel.remove(connectionPanel);
             
-            MainPanel mainPanel = new MainPanel(BurpExtender.coverage);
+            MainPanel mainPanel = new MainPanel(BurpExtender.multiplayer);
             BurpExtender.rootPanel.add(mainPanel);
             
             // HTTP Listener
-            BurpExtender.callbacks.registerHttpListener(coverage);
+            BurpExtender.callbacks.registerHttpListener(multiplayer);
             
             BurpExtender.rootPanel.repaint();
             BurpExtender.rootPanel.revalidate();

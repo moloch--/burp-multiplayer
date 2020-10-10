@@ -5,7 +5,7 @@
  */
 package burp.gui;
 
-import burp.Coverage;
+import burp.Multiplayer;
 import java.util.*;
 
 /**
@@ -14,14 +14,14 @@ import java.util.*;
  */
 public class ConnectionPanel extends javax.swing.JPanel {
 
-    private static Coverage coverage;
+    private Multiplayer multiplayer;
     private List<Runnable> callbacks = new ArrayList<Runnable>();
     
     /**
      * Creates new form ConnectionPanel
      */
-    public ConnectionPanel(Coverage coverage) {
-        this.coverage = coverage;
+    public ConnectionPanel(Multiplayer multiplayer) {
+        this.multiplayer = multiplayer;
         initComponents();
     }
     
@@ -73,7 +73,7 @@ public class ConnectionPanel extends javax.swing.JPanel {
         projectNameTextField.setColumns(10);
 
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("Database Connection");
+        jLabel4.setText("RethinkDB Connection");
 
         connectButton.setText("Connect");
         connectButton.addActionListener(new java.awt.event.ActionListener() {
@@ -95,18 +95,15 @@ public class ConnectionPanel extends javax.swing.JPanel {
                             .addComponent(projectNameLabel)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(projectNameTextField))
-                        .addGroup(layout.createSequentialGroup()
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(connectButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(portNumberLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(hoastnameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGap(10, 10, 10)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(connectButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                        .addComponent(portNumberLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(hoastnameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGap(10, 10, 10)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(hostnameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(portNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))))
+                                .addComponent(hostnameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(portNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addContainerGap(401, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -145,7 +142,7 @@ public class ConnectionPanel extends javax.swing.JPanel {
         Integer port = Integer.parseInt(this.portNumberTextField.getText());
         String projectName = this.projectNameTextField.getText();
         
-        Boolean connected = this.coverage.Connect(hostname, port, projectName);
+        Boolean connected = this.multiplayer.Connect(hostname, port, projectName);
         if (connected) {
             this.triggerOnConnection();
         }

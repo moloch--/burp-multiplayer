@@ -5,7 +5,7 @@
  */
 package burp.gui;
 
-import burp.Coverage;
+import burp.Multiplayer;
 
 /**
  *
@@ -13,16 +13,16 @@ import burp.Coverage;
  */
 public class MainPanel extends javax.swing.JPanel {
 
-    private Coverage coverage;
+    private Multiplayer multiplayer;
     
     /**
      * Creates new form MainPanel
      */
-    public MainPanel(Coverage coverage) {
+    public MainPanel(Multiplayer multiplayer) {
         initComponents();
-        this.coverage = coverage;
+        this.multiplayer = multiplayer;
         
-        InScopePane inScopePane = new InScopePane(coverage);
+        InScopePane inScopePane = new InScopePane(multiplayer);
         this.mainTabbedPane.addTab("In-Scope", inScopePane);
         
         OptionsPane optionsPane = new OptionsPane();

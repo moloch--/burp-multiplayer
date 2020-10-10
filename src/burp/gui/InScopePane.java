@@ -5,23 +5,31 @@
  */
 package burp.gui;
 
-import burp.Coverage;
+import burp.ChangeCallback;
+import burp.Multiplayer;
+import burp.MultiplayerRequestResponse;
 
 /**
  *
  * @author moloch
  */
-public class InScopePane extends javax.swing.JPanel {
+public class InScopePane extends javax.swing.JPanel implements ChangeCallback {
 
-    private Coverage coverage;
+    private Multiplayer multiplayer;
     
     /**
      * Creates new form InScopePane
      */
-    public InScopePane(Coverage coverage) {
-        this.coverage = coverage;
+    public InScopePane(Multiplayer multiplayer) {
+        this.multiplayer = multiplayer;
         initComponents();
+        this.multiplayer.history.registerOnChangeCallback(this);
+        
+    }
 
+    @Override
+    public void onChange(String reqRespId) {
+        
     }
 
     /**
@@ -35,6 +43,7 @@ public class InScopePane extends javax.swing.JPanel {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         workTable = new javax.swing.JTable();
+        syncToggleButton = new javax.swing.JToggleButton();
 
         workTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -66,19 +75,27 @@ public class InScopePane extends javax.swing.JPanel {
         jScrollPane1.setViewportView(workTable);
         workTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
+        syncToggleButton.setText("Pause Sync");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 621, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 621, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(syncToggleButton)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(94, 94, 94)
+                .addContainerGap()
+                .addComponent(syncToggleButton)
+                .addGap(66, 66, 66)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(117, Short.MAX_VALUE))
         );
@@ -87,6 +104,8 @@ public class InScopePane extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JToggleButton syncToggleButton;
     private javax.swing.JTable workTable;
     // End of variables declaration//GEN-END:variables
+
 }

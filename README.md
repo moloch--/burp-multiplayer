@@ -1,3 +1,3 @@
-# coverage
+# Multiplayer
 
-A Burp Coverage Plugin
+A Multiplayer Plugin for Burp

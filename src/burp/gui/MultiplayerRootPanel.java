@@ -11,12 +11,12 @@ import javax.swing.JPanel;
  *
  * @author moloch
  */
-public class CoverageRootPanel extends javax.swing.JPanel {
+public class MultiplayerRootPanel extends javax.swing.JPanel {
 
     /**
      * Creates new form RootPanel
      */
-    public CoverageRootPanel() {
+    public MultiplayerRootPanel() {
         initComponents();
     }
     

@@ -6,12 +6,15 @@
 package burp;
 
 import java.net.URL;
+import java.util.HashMap;
 
 /**
  *
  * @author moloch
  */
-public class CoverageRequestResponse implements IHttpRequestResponse {
+public class MultiplayerRequestResponse implements IHttpRequestResponse {
+    
+    private String id;
     
     private byte[] request;
     private byte[] response;
@@ -22,11 +25,21 @@ public class CoverageRequestResponse implements IHttpRequestResponse {
     private IBurpExtenderCallbacks callbacks;
     private IExtensionHelpers helpers;
     
-    public CoverageRequestResponse(IBurpExtenderCallbacks callbacks) {
+    public MultiplayerRequestResponse(HashMap entry, IBurpExtenderCallbacks callbacks) {
         this.callbacks = callbacks;
-        this.helpers = callbacks.getHelpers();
+        this.helpers = this.callbacks.getHelpers();
+        
+        this.id = (String) entry.get("id");
+        this.comment = (String) entry.get("comment");
+        this.highlight = (String) entry.get("highlight");
+        this.request = helpers.base64Decode((String) entry.get("request"));
+        this.response = helpers.base64Decode((String) entry.get("response"));
     }
 
+    public String getId() {
+        return id;
+    }
+    
     public IRequestInfo getRequestInfo() {
         return helpers.analyzeRequest(this);
     }
@@ -36,7 +49,7 @@ public class CoverageRequestResponse implements IHttpRequestResponse {
     }
     
     public URL getURL() {
-        return this.getRequestInfo().getUrl();
+        return getRequestInfo().getUrl();
     }
     
     // Interface Methods
