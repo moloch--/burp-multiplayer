@@ -43,7 +43,6 @@
   <SubComponents>
     <Container class="javax.swing.JSplitPane" name="parentSplitPane">
       <Properties>
-        <Property name="dividerSize" type="int" value="4"/>
         <Property name="orientation" type="int" value="0"/>
       </Properties>
 

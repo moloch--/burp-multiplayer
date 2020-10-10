@@ -69,7 +69,6 @@ public class InScopePane extends javax.swing.JPanel {
         bottomTabbedPane = new javax.swing.JTabbedPane();
         jButton1 = new javax.swing.JButton();
 
-        parentSplitPane.setDividerSize(4);
         parentSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
         inScopeTable.setColumnSelectionAllowed(true);
