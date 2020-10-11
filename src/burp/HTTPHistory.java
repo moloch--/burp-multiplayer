@@ -198,6 +198,9 @@ public class HTTPHistory extends AbstractTableModel {
     }
     
     public int getProgress() {
+        if (history.isEmpty()) {
+            return 0; // Avoid divide by zero
+        }
         float done = 0;
         Iterator iter = history.keySet().iterator();
         while (iter.hasNext()) {
