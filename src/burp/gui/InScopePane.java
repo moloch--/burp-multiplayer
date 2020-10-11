@@ -9,9 +9,15 @@ import burp.HTTPMessageEditor;
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
 import burp.MultiplayerRequestResponse;
+import java.awt.Color;
+import java.awt.Component;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
 
 /**
@@ -36,6 +42,18 @@ public class InScopePane extends javax.swing.JPanel {
         inScopeTable.getColumnModel().getColumn(0).setMinWidth(0);
         inScopeTable.getColumnModel().getColumn(0).setMaxWidth(0);
 
+        // Highlight column
+        int highlightColumnIndex = multiplayer.history.columns.indexOf(multiplayer.history.Highlight);
+        TableColumn highlightColumn = inScopeTable.getColumnModel().getColumn(highlightColumnIndex);
+        JComboBox comboBox = new JComboBox();
+        comboBox.addItem("Red");
+        comboBox.addItem("Blue");
+        comboBox.addItem("Green");
+        comboBox.addItem("Yellow");
+        comboBox.addItem("None");
+        
+        highlightColumn.setCellEditor(new DefaultCellEditor(comboBox));
+
         this.multiplayer.history.addTableModelListener(inScopeTable);
         
         // Row Selection Listener
@@ -48,17 +66,27 @@ public class InScopePane extends javax.swing.JPanel {
             }
         };
         inScopeTable.getSelectionModel().addListSelectionListener(rowSelectionListener);
+        
+        this.repaint();
+        this.revalidate();
     }
     
     public void displayMessageEditorFor(String reqRespId) {
         callbacks.printOutput(String.format("Selected: %s", reqRespId));
         MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
         
+        // Save active tab
+        int selectedTabIndex = bottomTabbedPane.getSelectedIndex();
+        if (selectedTabIndex == -1) {
+            selectedTabIndex = 0;
+        }
+        
         bottomTabbedPane.removeAll();
         
         HTTPMessageEditor editor = new HTTPMessageEditor(reqResp, callbacks);
         bottomTabbedPane.addTab("Request", editor.getRequestEditor().getComponent());
         bottomTabbedPane.addTab("Response", editor.getResponseEditor().getComponent());
+        bottomTabbedPane.setSelectedIndex(selectedTabIndex);
     }
 
     /**
@@ -72,7 +100,19 @@ public class InScopePane extends javax.swing.JPanel {
 
         parentSplitPane = new javax.swing.JSplitPane();
         inScopeTablePane = new javax.swing.JScrollPane();
-        inScopeTable = new javax.swing.JTable(this.multiplayer.history);
+        inScopeTable = new javax.swing.JTable(this.multiplayer.history) {
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                Component component = super.prepareRenderer(renderer, row, column);
+                JComponent jComponent = (JComponent) component;
+                String id = (String) this.getValueAt(row, 0);
+                Color backgroundColor = multiplayer.history.getColorForId(id);
+                callbacks.printOutput(String.format("Row = %d, Column = %d (%s) -> %s", row, column, id, backgroundColor));
+                if(!component.getBackground().equals(getSelectionBackground())) {
+                    component.setBackground(backgroundColor);
+                }
+                return component;
+            }
+        };
         bottomTabbedPane = new javax.swing.JTabbedPane();
         jButton1 = new javax.swing.JButton();
 

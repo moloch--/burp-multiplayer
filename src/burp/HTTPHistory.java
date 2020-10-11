@@ -5,12 +5,13 @@
  */
 package burp;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -36,12 +37,23 @@ public class HTTPHistory extends AbstractTableModel {
     public static final String Port = "Port";
     public static final String StatusCode = "Status Code";
     public static final String Comment = "Comment";
-    public static final String[] columns = {
-        ID, Method, Protocol, Host, Path, Port, StatusCode, Comment
-    };
-    public static final List<String> editableColumns = new ArrayList<String>(Arrays.asList(
-        Comment
+    public static final String Highlight = "Highlight";
+    public static final List<String> columns = new ArrayList<String>(Arrays.asList(
+        ID, Method, Protocol, Host, Path, Port, StatusCode, Comment, Highlight
     ));
+    public static final List<String> editableColumns = new ArrayList<String>(Arrays.asList(
+        Comment, Highlight
+    ));
+    
+    public static final String Red = "Red";
+    public static final String Blue = "Blue";
+    public static final String Green = "Green";
+    public static final List<String> highlights = new ArrayList<String>(Arrays.asList(
+        Red, Blue, Green
+    ));
+    
+    
+    
     private final ConcurrentSkipListMap<String, MultiplayerRequestResponse> history;
     
     public HTTPHistory(ExecutorService executor, IBurpExtenderCallbacks callbacks) {
@@ -76,12 +88,12 @@ public class HTTPHistory extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return columns.length;
+        return columns.size();
     }
 
     @Override
     public String getColumnName(int columnIndex) {
-        return columns[columnIndex];
+        return columns.get(columnIndex);
     }
     
     @Override
@@ -106,7 +118,7 @@ public class HTTPHistory extends AbstractTableModel {
         }
         MultiplayerRequestResponse reqResp = history.get(iter.next());
 
-        switch(columns[columnIndex]) {
+        switch(columns.get(columnIndex)) {
             case ID:
                 return reqResp.getId();
             case Method:
@@ -123,8 +135,27 @@ public class HTTPHistory extends AbstractTableModel {
                 return reqResp.getStatus();
             case Comment:
                 return reqResp.getComment();
+            case Highlight:
+                String highlight = reqResp.getHighlight();
+                if (highlight.isBlank() || highlight.isEmpty()) {
+                    return "None";
+                }
+                return highlight;
         }
         return null;
+    }
+    
+    public Color getColorForId(String id) {
+        MultiplayerRequestResponse reqResp = history.get(id);
+        switch(reqResp.getHighlight()) {
+            case Red:
+                return Color.RED;
+            case Blue:
+                return Color.BLUE;
+            case Green:
+                return Color.GREEN;
+        }
+        return Color.WHITE;
     }
     
     @Override

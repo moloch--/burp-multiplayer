@@ -24,6 +24,14 @@ public class BurpExtender implements IBurpExtender, ITab {
         BurpExtender.callbacks = callbacks;
         this.logInfo("Multiplayer plugin loading ...");
         BurpExtender.callbacks.setExtensionName(BurpExtender.name);
+        
+        main();
+
+        // Register us as the main ITab
+        BurpExtender.callbacks.addSuiteTab(BurpExtender.this);
+    }
+    
+    public void main() {
         BurpExtender.multiplayer = new Multiplayer(callbacks);
 
         // Root Panel
@@ -44,9 +52,7 @@ public class BurpExtender implements IBurpExtender, ITab {
             BurpExtender.rootPanel.repaint();
             BurpExtender.rootPanel.revalidate();
         });
-
-        // Register us as the main ITab
-        BurpExtender.callbacks.addSuiteTab(BurpExtender.this);
+        
     }
 
     @Override
