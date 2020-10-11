@@ -180,7 +180,7 @@ public class HTTPHistory extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         String id = (String) getValueAt(row, 0);
-        callbacks.printOutput(String.format("(%d, %d) %s -> %s", row, column, id, value));
+        // callbacks.printOutput(String.format("(%d, %d) %s -> %s", row, column, id, value));
         String columnName = getColumnName(column);
         if (editableColumns.contains(columnName)) {
             triggerOnEdit(id, columnName, value);

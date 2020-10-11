@@ -11,11 +11,16 @@ import burp.Multiplayer;
 import burp.MultiplayerRequestResponse;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JMenu;
 import javax.swing.RowFilter;
 import javax.swing.RowFilter.Entry;
 import javax.swing.event.ListSelectionEvent;
@@ -26,6 +31,10 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JTable;
 
 
 /**
@@ -85,6 +94,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
         inScopeTable.getSelectionModel().addListSelectionListener(rowSelectionListener);
         applyRowFilter();
         updateStateProgress();
+        initContextMenu();
         refresh();
     }
     
@@ -154,6 +164,115 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
         stateProgressBar.setValue(progress);
         refresh();
     }
+    
+    public void initContextMenu() {
+        final JPopupMenu contextMenu = new JPopupMenu();
+        
+        contextMenu.add(initSendToMenu());
+        
+        // Delete
+        JMenuItem deleteItem = new JMenuItem("Delete");
+        deleteItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
+                JOptionPane.showMessageDialog(inScopeTablePane, String.format("DELETE: %s", reqRespId));
+                // JOptionPane.showMessageDialog(, "Right-click performed on table and choose DELETE");
+            }
+            
+        });
+        contextMenu.add(deleteItem);
+
+        inScopeTable.addMouseListener(new MouseAdapter() {
+            
+            @Override
+            public void mouseReleased(MouseEvent event) {
+                int r = inScopeTable.rowAtPoint(event.getPoint());
+                if (r >= 0 && r < inScopeTable.getRowCount()) {
+                    inScopeTable.setRowSelectionInterval(r, r);
+                } else {
+                    inScopeTable.clearSelection();
+                }
+
+                int rowIndex = inScopeTable.getSelectedRow();
+                if (rowIndex < 0) {
+                    return;
+                }
+                if (event.isPopupTrigger() && event.getComponent() instanceof JTable) {
+                    contextMenu.show(event.getComponent(), event.getX(), event.getY());
+                }
+            }
+            
+        });
+        inScopeTable.setComponentPopupMenu(contextMenu);
+
+    }
+    
+    public JMenu initSendToMenu() {
+        JMenu sendToMenu = new JMenu("Send To");
+        
+
+        // Repeater
+        JMenuItem sendToRepeaterItem = new JMenuItem("Repeater");
+        sendToRepeaterItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
+                MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
+                Boolean useHttps = reqResp.getProtocol().toLowerCase() == "https";
+                callbacks.sendToRepeater(reqResp.getHost(), reqResp.getPort(), useHttps, reqResp.getRequest(), "");
+            }
+            
+        });
+        sendToMenu.add(sendToRepeaterItem);
+
+        // Intruder
+        JMenuItem sendToIntruderItem = new JMenuItem("Intruder");
+        sendToIntruderItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
+                MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
+                Boolean useHttps = reqResp.getProtocol().toLowerCase() == "https";
+                callbacks.sendToIntruder(reqResp.getHost(), reqResp.getPort(), useHttps, reqResp.getRequest());
+            }
+            
+        });
+        sendToMenu.add(sendToIntruderItem);
+
+        // Comparer (Request)
+        JMenuItem sendToComparerReqItem = new JMenuItem("Comparer (Request)");
+        sendToComparerReqItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
+                MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
+                callbacks.sendToComparer(reqResp.getRequest());
+            }
+            
+        });
+        sendToMenu.add(sendToComparerReqItem);        
+        
+        // Comparer (Response)
+        JMenuItem sendToComparerRespItem = new JMenuItem("Comparer (Response)");
+        sendToComparerRespItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
+                MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
+                callbacks.sendToComparer(reqResp.getResponse());
+            }
+            
+        });
+        sendToMenu.add(sendToComparerRespItem);   
+        
+        return sendToMenu;
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -203,7 +322,12 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
         parentSplitPane.setTopComponent(inScopeTablePane);
         parentSplitPane.setRightComponent(bottomTabbedPane);
 
-        jButton1.setText("jButton1");
+        jButton1.setText("Export Spreadsheet");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         newStateCheckBox.setSelected(true);
         newStateCheckBox.setText("New");
@@ -240,7 +364,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
         });
 
         jLabel1.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
-        jLabel1.setText("Progress:");
+        jLabel1.setText("Coverage:");
 
         stateProgressBar.setStringPainted(true);
 
@@ -281,8 +405,8 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
                     .addComponent(inProgressStateCheckBox)
                     .addComponent(doneStateCheckBox)
                     .addComponent(blockedStateCheckBox)
-                    .addComponent(jLabel1)
-                    .addComponent(stateProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(stateProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(parentSplitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 682, Short.MAX_VALUE)
                 .addContainerGap())
@@ -308,6 +432,10 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
         applyRowFilter();
         refresh();
     }//GEN-LAST:event_blockedStateCheckBoxActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

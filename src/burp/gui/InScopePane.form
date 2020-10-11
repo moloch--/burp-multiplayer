@@ -52,8 +52,8 @@
                   <Component id="inProgressStateCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="doneStateCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="blockedStateCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="stateProgressBar" alignment="1" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="parentSplitPane" pref="682" max="32767" attributes="0"/>
@@ -112,8 +112,11 @@
     </Container>
     <Component class="javax.swing.JButton" name="jButton1">
       <Properties>
-        <Property name="text" type="java.lang.String" value="jButton1"/>
+        <Property name="text" type="java.lang.String" value="Export Spreadsheet"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JCheckBox" name="newStateCheckBox">
       <Properties>
@@ -163,7 +166,7 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name=".SF NS Text" size="13" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Progress:"/>
+        <Property name="text" type="java.lang.String" value="Coverage:"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JProgressBar" name="stateProgressBar">
