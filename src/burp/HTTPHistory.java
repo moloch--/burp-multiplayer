@@ -6,11 +6,10 @@
 package burp;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.SortedSet;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import javax.swing.event.TableModelEvent;
@@ -27,6 +26,7 @@ public class HTTPHistory extends AbstractTableModel {
     private IBurpExtenderCallbacks callbacks;
     private final List<TableModelListener> tableListenerCallbacks = new ArrayList();
     private final ExecutorService executor;
+    private final List<OnEditCallback> onEditCallbacks = new ArrayList();
     
     public static final String ID = "ID";
     public static final String Method = "Method";
@@ -35,22 +35,37 @@ public class HTTPHistory extends AbstractTableModel {
     public static final String Path = "Path";
     public static final String Port = "Port";
     public static final String StatusCode = "Status Code";
+    public static final String Comment = "Comment";
     public static final String[] columns = {
-        ID, Method, Protocol, Host, Path, Port, StatusCode
+        ID, Method, Protocol, Host, Path, Port, StatusCode, Comment
     };
-    private final ConcurrentSkipListSet<MultiplayerRequestResponse> history;
+    public static final List<String> editableColumns = new ArrayList<String>(Arrays.asList(
+        Comment
+    ));
+    private final ConcurrentSkipListMap<String, MultiplayerRequestResponse> history;
     
     public HTTPHistory(ExecutorService executor, IBurpExtenderCallbacks callbacks) {
-        history = new ConcurrentSkipListSet();
+        history = new ConcurrentSkipListMap();
         this.executor = executor;
         this.callbacks = callbacks;
     }
     
     public void add(MultiplayerRequestResponse reqResp) {
-        history.add(reqResp);
-        TableModelEvent event = new TableModelEvent(this); // TODO: Don't refresh the entire table
+        history.put(reqResp.getId(), reqResp);
+        // TODO: Don't refresh the entire table
+        TableModelEvent event = new TableModelEvent(this);
         tableListenerCallbacks.forEach(listener -> {
             executor.submit(() -> listener.tableChanged(event));
+        });
+    }
+    
+    public void registerOnEditCallback(OnEditCallback callback) {
+        onEditCallbacks.add(callback);
+    }
+    
+    private void triggerOnEdit(String id, String columnName, Object value) {
+        onEditCallbacks.forEach(callback -> {
+            executor.submit(() -> callback.onEdit(id, columnName, value));
         });
     }
     
@@ -80,24 +95,16 @@ public class HTTPHistory extends AbstractTableModel {
     }
     
     public MultiplayerRequestResponse getById(String reqRespId) {
-        // Linear search, yea yea it's terrible    
-        Iterator<MultiplayerRequestResponse> iter = history.iterator();
-        while (iter.hasNext()) {
-            MultiplayerRequestResponse reqResp = iter.next();
-            if (reqResp.getId().equals(reqRespId)) {
-                return reqResp;
-            }
-        }
-        return null;
+        return history.get(reqRespId);
     }
 
     @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        Iterator<MultiplayerRequestResponse> iter = history.iterator();
+    public Object getValueAt(int rowIndex, int columnIndex) {   
+        Iterator iter = history.keySet().iterator();
         for (int index = 0; index < rowIndex; ++index) {
             iter.next();
         }
-        MultiplayerRequestResponse reqResp = iter.next();
+        MultiplayerRequestResponse reqResp = history.get(iter.next());
 
         switch(columns[columnIndex]) {
             case ID:
@@ -114,8 +121,20 @@ public class HTTPHistory extends AbstractTableModel {
                 return reqResp.getPort();
             case StatusCode:
                 return reqResp.getStatus();
+            case Comment:
+                return reqResp.getComment();
         }
         return null;
+    }
+    
+    @Override
+    public void setValueAt(Object value, int row, int column) {
+        String id = (String) getValueAt(row, 0);
+        callbacks.printOutput(String.format("(%d, %d) %s -> %s", row, column, id, value));
+        String columnName = getColumnName(column);
+        if (editableColumns.contains(columnName)) {
+            triggerOnEdit(id, columnName, value);
+        }
     }
     
     @Override
@@ -125,7 +144,7 @@ public class HTTPHistory extends AbstractTableModel {
     
     @Override
     public boolean isCellEditable(int row, int col) {
-        return false;
+        return editableColumns.contains(getColumnName(col));
     }
 
 }

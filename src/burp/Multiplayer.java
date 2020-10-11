@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
  *
  * @author moloch
  */
-public class Multiplayer implements IHttpListener {
+public class Multiplayer implements IHttpListener, OnEditCallback {
 
     private static final RethinkDB r = RethinkDB.r;
     private static final String HTTPTable = "http";
@@ -61,6 +61,7 @@ public class Multiplayer implements IHttpListener {
             }
 
             initalizeHistory();
+            history.registerOnEditCallback(this);
             
             executor.submit(() -> {
                 Result<MultiplayerRequestResponse> changes = http().changes().getField("new_val").run(dbConn, MultiplayerRequestResponse.class);
@@ -193,6 +194,11 @@ public class Multiplayer implements IHttpListener {
     private Table http() {
         return r.db(dbName).table(HTTPTable);
     }
+
+    @Override
+    public void onEdit(String id, String field, Object value) {
+        http().get(id).update(r.hashMap(field.toLowerCase(), value)).run(dbConn);
+    }
     
     // Loggers
     public void logInfo(String msg) {
@@ -206,4 +212,5 @@ public class Multiplayer implements IHttpListener {
     public void logError(String msg) {
         this.callbacks.printError(String.format("[ERROR] %s", msg));
     }
+
 }
