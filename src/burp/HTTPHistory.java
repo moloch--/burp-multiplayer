@@ -155,7 +155,7 @@ public class HTTPHistory extends AbstractTableModel {
             case Green:
                 return Color.GREEN;
         }
-        return Color.WHITE;
+        return javax.swing.UIManager.getColor("Table.dropCellForeground");
     }
     
     @Override
