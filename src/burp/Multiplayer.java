@@ -21,7 +21,6 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
 
     private static final RethinkDB r = RethinkDB.r;
     private static final String HTTPTable = "http";
-    // private static final String PayloadsTable = "payloads";
     private Connection dbConn = null;
     private String dbName;  // Database Name aka 'Project Name'
     
@@ -64,10 +63,15 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             history.registerOnEditCallback(this);
             
             executor.submit(() -> {
-                Result<MultiplayerRequestResponse> changes = http().changes().getField("new_val").run(dbConn, MultiplayerRequestResponse.class);
-                for (MultiplayerRequestResponse reqResp : changes) {
-                    history.add(reqResp);
+                Result<ChangefeedMessage> changes = http().changes().run(dbConn, ChangefeedMessage.class);
+                for (ChangefeedMessage msg : changes) {
+                    if (msg.getNewVal() != null) {
+                        history.add(msg.getNewVal());
+                    } else if (msg.getNewVal() == null && msg.getOldVal() != null) {
+                        history.remove(msg.getOldVal().getId());
+                    }
                 }
+                
             });
             
             return true;
@@ -100,7 +104,6 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         Result<MultiplayerRequestResponse> result = http().run(dbConn, MultiplayerRequestResponse.class);
         while (result.hasNext()) {
             MultiplayerRequestResponse entry = result.next();
-            logInfo(String.format("+ %s", entry));
             history.add(entry);
         }
         logInfo("History initialized");
@@ -158,6 +161,10 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
                 http().insert(reqRespToRethink(reqResp)).run(dbConn);
             }
         }
+    }
+    
+    public void reqRespRemove(String reqRespId) {
+        http().get(reqRespId).delete().run(dbConn);
     }
     
     public Boolean reqRespExists(IHttpRequestResponse reqResp) {

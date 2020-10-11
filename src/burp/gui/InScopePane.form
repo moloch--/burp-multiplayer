@@ -94,7 +94,7 @@
                 </Property>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JTable(this.multiplayer.history) {&#xa;    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {&#xa;        Component component = super.prepareRenderer(renderer, row, column);&#xa;        JComponent jComponent = (JComponent) component;&#xa;        String id = (String) this.getValueAt(row, 0);&#xa;        Color backgroundColor = multiplayer.history.getColorForId(id);&#xa;        // callbacks.printOutput(String.format(&quot;Row = %d, Column = %d (%s) -&gt; %s&quot;, row, column, id, backgroundColor));&#xa;        if(!component.getBackground().equals(getSelectionBackground())) {&#xa;            component.setBackground(backgroundColor);&#xa;        }&#xa;        return component;&#xa;    }&#xa;}"/>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JTable(this.multiplayer.history) {&#xa;    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {&#xa;        Component component = super.prepareRenderer(renderer, row, column);&#xa;        JComponent jComponent = (JComponent) component;&#xa;        String id = (String) this.getValueAt(row, 0);&#xa;        Color backgroundColor = multiplayer.history.getColorForId(id);&#xa;        if(!component.getBackground().equals(getSelectionBackground())) {&#xa;            component.setBackground(backgroundColor);&#xa;        }&#xa;        return component;&#xa;    }&#xa;}"/>
               </AuxValues>
             </Component>
           </SubComponents>

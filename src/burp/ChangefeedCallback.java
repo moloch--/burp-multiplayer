@@ -10,7 +10,7 @@ package burp;
  *
  * @author moloch
  */
-public interface ChangeCallback {
+public interface ChangefeedCallback {
  
     public void onChange(String reqRespId);
     

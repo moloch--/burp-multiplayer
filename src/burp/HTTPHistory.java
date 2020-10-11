@@ -23,7 +23,7 @@ import javax.swing.table.AbstractTableModel;
  */
 public class HTTPHistory extends AbstractTableModel {
     
-    private IBurpExtenderCallbacks callbacks;
+    private final IBurpExtenderCallbacks callbacks;
     private final List<TableModelListener> tableListenerCallbacks = new ArrayList();
     private final ExecutorService executor;
     private final List<OnEditCallback> onEditCallbacks = new ArrayList();
@@ -79,6 +79,17 @@ public class HTTPHistory extends AbstractTableModel {
         tableListenerCallbacks.forEach(listener -> {
             executor.submit(() -> listener.tableChanged(event));
         });
+    }
+    
+    public void remove(String reqRespId) {
+        if (history.containsKey(reqRespId)) {
+            history.remove(reqRespId);
+            // TODO: Don't refresh the entire table
+            TableModelEvent event = new TableModelEvent(this);
+            tableListenerCallbacks.forEach(listener -> {
+                executor.submit(() -> listener.tableChanged(event));
+            }); 
+        }
     }
     
     public void registerOnEditCallback(OnEditCallback callback) {

@@ -136,7 +136,6 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
     }
     
     public void displayMessageEditorFor(String reqRespId) {
-        // callbacks.printOutput(String.format("Selected: %s", reqRespId));
         MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
         
         // Save active tab
@@ -160,7 +159,6 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
     
     public void updateStateProgress() {
         int progress = multiplayer.history.getProgress();
-        callbacks.printOutput(String.format("Progress %d", progress));
         stateProgressBar.setValue(progress);
         refresh();
     }
@@ -177,8 +175,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
             @Override
             public void actionPerformed(ActionEvent e) {
                 String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
-                JOptionPane.showMessageDialog(inScopeTablePane, String.format("DELETE: %s", reqRespId));
-                // JOptionPane.showMessageDialog(, "Right-click performed on table and choose DELETE");
+                multiplayer.reqRespRemove(reqRespId);
             }
             
         });
@@ -291,7 +288,6 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
                 JComponent jComponent = (JComponent) component;
                 String id = (String) this.getValueAt(row, 0);
                 Color backgroundColor = multiplayer.history.getColorForId(id);
-                // callbacks.printOutput(String.format("Row = %d, Column = %d (%s) -> %s", row, column, id, backgroundColor));
                 if(!component.getBackground().equals(getSelectionBackground())) {
                     component.setBackground(backgroundColor);
                 }
