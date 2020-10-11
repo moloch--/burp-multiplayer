@@ -1,6 +1,5 @@
 package burp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rethinkdb.RethinkDB;
 import com.rethinkdb.gen.ast.Table;
 import com.rethinkdb.gen.exc.ReqlDriverError;
@@ -9,6 +8,7 @@ import com.rethinkdb.net.Connection;
 import com.rethinkdb.net.Result;
 
 import java.net.URL;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,7 +21,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
 
     private static final RethinkDB r = RethinkDB.r;
     private static final String HTTPTable = "http";
-    private static final String PayloadsTable = "payloads";
+    // private static final String PayloadsTable = "payloads";
     private Connection dbConn = null;
     private String dbName;  // Database Name aka 'Project Name'
     
@@ -66,7 +66,6 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             executor.submit(() -> {
                 Result<MultiplayerRequestResponse> changes = http().changes().getField("new_val").run(dbConn, MultiplayerRequestResponse.class);
                 for (MultiplayerRequestResponse reqResp : changes) {
-                    logInfo("ChangeFeed trigger!");
                     history.add(reqResp);
                 }
             });
@@ -178,6 +177,8 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             .with("status", respInfo.getStatusCode())
             .with("comment", "")
             .with("highlight", "")
+            .with("assessment", "")
+            .with("time", Instant.now().getEpochSecond())
             .with("request", r.binary(reqResp.getRequest()))
             .with("response", r.binary(reqResp.getResponse()));
     }

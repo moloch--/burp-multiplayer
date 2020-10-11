@@ -6,7 +6,6 @@
 package burp;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -38,21 +37,32 @@ public class HTTPHistory extends AbstractTableModel {
     public static final String StatusCode = "Status Code";
     public static final String Comment = "Comment";
     public static final String Highlight = "Highlight";
+    public static final String Assessment = "Assessment";
+    public static final String DateTime = "Date/Time";
+    
+    // 'ID' must be in position 0
     public static final List<String> columns = new ArrayList<String>(Arrays.asList(
-        ID, Method, Protocol, Host, Path, Port, StatusCode, Comment, Highlight
+        ID, Assessment, Method, Protocol, Host, Path, Port, StatusCode, Comment, Highlight, DateTime
     ));
     public static final List<String> editableColumns = new ArrayList<String>(Arrays.asList(
-        Comment, Highlight
+        Comment, Highlight, Assessment
     ));
     
     public static final String Red = "Red";
     public static final String Blue = "Blue";
     public static final String Green = "Green";
+    public static final String None = "None";
     public static final List<String> highlights = new ArrayList<String>(Arrays.asList(
-        Red, Blue, Green
+        Red, Blue, Green, None
     ));
     
-    
+    public static final String New = "New";
+    public static final String InProgress = "In Progress";
+    public static final String Blocked = "Blocked";
+    public static final String Done = "Done";
+    public static final List<String> assessmentStates = new ArrayList<String>(Arrays.asList(
+        New, InProgress, Blocked, Done
+    ));
     
     private final ConcurrentSkipListMap<String, MultiplayerRequestResponse> history;
     
@@ -138,9 +148,18 @@ public class HTTPHistory extends AbstractTableModel {
             case Highlight:
                 String highlight = reqResp.getHighlight();
                 if (highlight.isBlank() || highlight.isEmpty()) {
-                    return "None";
+                    return None;
                 }
                 return highlight;
+            case Assessment:
+                String assessment = reqResp.getAssessment();
+                if (assessment.isBlank() || assessment.isEmpty()) {
+                    return New;
+                }
+                return assessment;
+            case DateTime:
+                return reqResp.getDateTime();
+                
         }
         return null;
     }

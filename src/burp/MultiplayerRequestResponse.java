@@ -6,6 +6,12 @@
 package burp;
 
 import java.net.URL;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+
 
 /**
  *
@@ -21,7 +27,9 @@ public class MultiplayerRequestResponse implements IHttpRequestResponse, Compara
     private String highlight;
     private String method;
     private String path;
+    private String assessment;
     private int status;
+    private long time;
 
     private MultiplayerHttpService httpService = new MultiplayerHttpService();
 
@@ -111,7 +119,30 @@ public class MultiplayerRequestResponse implements IHttpRequestResponse, Compara
     public void setHighlight(String highlight) {
         this.highlight = highlight;
     }
-
+    
+    public void setAssessment(String assessment) {
+        this.assessment = assessment;
+    }
+    
+    public String getAssessment() {
+        return assessment;
+    }
+    
+    public void setTime(long time) {
+        this.time = time;
+    }
+    
+    public long getTime() {
+        return time;
+    }
+    
+    public String getDateTime() {
+        Instant instant = Instant.ofEpochSecond(time);
+        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                                                       .withZone(ZoneId.systemDefault());
+        return formatter.format(instant);
+    }
+    
     @Override
     public IHttpService getHttpService() {
         return httpService;

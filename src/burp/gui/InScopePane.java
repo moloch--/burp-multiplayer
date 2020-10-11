@@ -45,15 +45,22 @@ public class InScopePane extends javax.swing.JPanel {
         // Highlight column
         int highlightColumnIndex = multiplayer.history.columns.indexOf(multiplayer.history.Highlight);
         TableColumn highlightColumn = inScopeTable.getColumnModel().getColumn(highlightColumnIndex);
-        JComboBox comboBox = new JComboBox();
-        comboBox.addItem("Red");
-        comboBox.addItem("Blue");
-        comboBox.addItem("Green");
-        comboBox.addItem("Yellow");
-        comboBox.addItem("None");
-        
-        highlightColumn.setCellEditor(new DefaultCellEditor(comboBox));
+        JComboBox highlightComboBox = new JComboBox();
+        for (String colorName : multiplayer.history.highlights) {
+            highlightComboBox.addItem(colorName);
+        }
+        highlightColumn.setCellEditor(new DefaultCellEditor(highlightComboBox));
 
+        // Assessment column
+        int assessmentColumnIndex = multiplayer.history.columns.indexOf(multiplayer.history.Assessment);
+        TableColumn assessmentColumn = inScopeTable.getColumnModel().getColumn(assessmentColumnIndex);
+        JComboBox assessmentStateComboBox = new JComboBox();
+        for (String state : multiplayer.history.assessmentStates) {
+            assessmentStateComboBox.addItem(state);
+        }
+        assessmentColumn.setCellEditor(new DefaultCellEditor(assessmentStateComboBox));
+        
+        // Table listener
         this.multiplayer.history.addTableModelListener(inScopeTable);
         
         // Row Selection Listener
