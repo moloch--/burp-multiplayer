@@ -20,6 +20,8 @@ import javax.swing.RowFilter;
 import javax.swing.RowFilter.Entry;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
@@ -30,7 +32,7 @@ import javax.swing.table.TableRowSorter;
  *
  * @author moloch
  */
-public class InScopePane extends javax.swing.JPanel {
+public class InScopePane extends javax.swing.JPanel implements TableModelListener {
 
     private Multiplayer multiplayer;
     private IBurpExtenderCallbacks callbacks;
@@ -69,6 +71,7 @@ public class InScopePane extends javax.swing.JPanel {
         
         // Table listener
         this.multiplayer.history.addTableModelListener(inScopeTable);
+        this.multiplayer.history.addTableModelListener(this);
         
         // Row Selection Listener
         rowSelectionListener = new ListSelectionListener() {
@@ -81,6 +84,7 @@ public class InScopePane extends javax.swing.JPanel {
         };
         inScopeTable.getSelectionModel().addListSelectionListener(rowSelectionListener);
         applyRowFilter();
+        updateStateProgress();
         refresh();
     }
     
@@ -122,7 +126,7 @@ public class InScopePane extends javax.swing.JPanel {
     }
     
     public void displayMessageEditorFor(String reqRespId) {
-        callbacks.printOutput(String.format("Selected: %s", reqRespId));
+        // callbacks.printOutput(String.format("Selected: %s", reqRespId));
         MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
         
         // Save active tab
@@ -137,6 +141,18 @@ public class InScopePane extends javax.swing.JPanel {
         bottomTabbedPane.addTab("Request", editor.getRequestEditor().getComponent());
         bottomTabbedPane.addTab("Response", editor.getResponseEditor().getComponent());
         bottomTabbedPane.setSelectedIndex(selectedTabIndex);
+    }
+    
+    public void tableChanged(TableModelEvent event) {
+        callbacks.printOutput("Table changed (InScopePanel)");
+        updateStateProgress();
+    }
+    
+    public void updateStateProgress() {
+        int progress = multiplayer.history.getProgress();
+        callbacks.printOutput(String.format("Progress %d", progress));
+        stateProgressBar.setValue(progress);
+        refresh();
     }
 
     /**
@@ -170,6 +186,8 @@ public class InScopePane extends javax.swing.JPanel {
         inProgressStateCheckBox = new javax.swing.JCheckBox();
         doneStateCheckBox = new javax.swing.JCheckBox();
         blockedStateCheckBox = new javax.swing.JCheckBox();
+        jLabel1 = new javax.swing.JLabel();
+        stateProgressBar = new javax.swing.JProgressBar();
 
         parentSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
@@ -221,6 +239,11 @@ public class InScopePane extends javax.swing.JPanel {
             }
         });
 
+        jLabel1.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
+        jLabel1.setText("Progress:");
+
+        stateProgressBar.setStringPainted(true);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -239,6 +262,10 @@ public class InScopePane extends javax.swing.JPanel {
                 .addComponent(doneStateCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(blockedStateCheckBox)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(stateProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton1)
                 .addContainerGap())
@@ -253,7 +280,9 @@ public class InScopePane extends javax.swing.JPanel {
                     .addComponent(filtersLabel)
                     .addComponent(inProgressStateCheckBox)
                     .addComponent(doneStateCheckBox)
-                    .addComponent(blockedStateCheckBox))
+                    .addComponent(blockedStateCheckBox)
+                    .addComponent(jLabel1)
+                    .addComponent(stateProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(parentSplitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 682, Short.MAX_VALUE)
                 .addContainerGap())
@@ -290,8 +319,10 @@ public class InScopePane extends javax.swing.JPanel {
     private javax.swing.JTable inScopeTable;
     private javax.swing.JScrollPane inScopeTablePane;
     private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JCheckBox newStateCheckBox;
     private javax.swing.JSplitPane parentSplitPane;
+    private javax.swing.JProgressBar stateProgressBar;
     // End of variables declaration//GEN-END:variables
 
 

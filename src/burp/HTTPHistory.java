@@ -196,5 +196,17 @@ public class HTTPHistory extends AbstractTableModel {
     public boolean isCellEditable(int row, int col) {
         return editableColumns.contains(getColumnName(col));
     }
+    
+    public int getProgress() {
+        float done = 0;
+        Iterator iter = history.keySet().iterator();
+        while (iter.hasNext()) {
+            if (history.get(iter.next()).getAssessment().equals(Done)) {
+                ++done;
+            }
+        }
+        float progress = done / (float) history.size();
+        return (int) Math.round(progress * 100.0);
+    }
 
 }
