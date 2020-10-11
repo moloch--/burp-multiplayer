@@ -11,13 +11,19 @@ import burp.Multiplayer;
 import burp.MultiplayerRequestResponse;
 import java.awt.Color;
 import java.awt.Component;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.RowFilter;
+import javax.swing.RowFilter.Entry;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 
 /**
@@ -29,6 +35,7 @@ public class InScopePane extends javax.swing.JPanel {
     private Multiplayer multiplayer;
     private IBurpExtenderCallbacks callbacks;
     private ListSelectionListener rowSelectionListener;
+    private TableRowSorter<TableModel> sorter;
     
     /**
      * Creates new form InScopePane
@@ -73,7 +80,43 @@ public class InScopePane extends javax.swing.JPanel {
             }
         };
         inScopeTable.getSelectionModel().addListSelectionListener(rowSelectionListener);
+        applyRowFilter();
+        refresh();
+    }
+    
+    private void applyRowFilter() {
+
+        sorter.setRowFilter(new RowFilter<TableModel, Integer>() {
+            
+            public boolean include(Entry<? extends TableModel, ? extends Integer> entry) {
+                Integer rowNumber = entry.getIdentifier();
+                TableModel model = entry.getModel();
+                int assessmentColumnIndex = multiplayer.history.columns.indexOf(multiplayer.history.Assessment);
+                String state = (String) model.getValueAt(rowNumber, assessmentColumnIndex);
+                return getEnabledFilters().contains(state);
+            }
+            
+        });
+    }
         
+    private List<String> getEnabledFilters() {
+        List<String> enabledFilters = new ArrayList();
+        if (newStateCheckBox.isSelected()) {
+            enabledFilters.add(multiplayer.history.New);
+        }
+        if (inProgressStateCheckBox.isSelected()) {
+            enabledFilters.add(multiplayer.history.InProgress);
+        }
+        if (doneStateCheckBox.isSelected()) {
+            enabledFilters.add(multiplayer.history.Done);
+        }
+        if (blockedStateCheckBox.isSelected()) {
+            enabledFilters.add(multiplayer.history.Blocked);
+        }
+        return enabledFilters;
+    }
+    
+    public void refresh() {
         this.repaint();
         this.revalidate();
     }
@@ -113,7 +156,7 @@ public class InScopePane extends javax.swing.JPanel {
                 JComponent jComponent = (JComponent) component;
                 String id = (String) this.getValueAt(row, 0);
                 Color backgroundColor = multiplayer.history.getColorForId(id);
-                callbacks.printOutput(String.format("Row = %d, Column = %d (%s) -> %s", row, column, id, backgroundColor));
+                // callbacks.printOutput(String.format("Row = %d, Column = %d (%s) -> %s", row, column, id, backgroundColor));
                 if(!component.getBackground().equals(getSelectionBackground())) {
                     component.setBackground(backgroundColor);
                 }
@@ -122,6 +165,11 @@ public class InScopePane extends javax.swing.JPanel {
         };
         bottomTabbedPane = new javax.swing.JTabbedPane();
         jButton1 = new javax.swing.JButton();
+        newStateCheckBox = new javax.swing.JCheckBox();
+        filtersLabel = new javax.swing.JLabel();
+        inProgressStateCheckBox = new javax.swing.JCheckBox();
+        doneStateCheckBox = new javax.swing.JCheckBox();
+        blockedStateCheckBox = new javax.swing.JCheckBox();
 
         parentSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
@@ -129,7 +177,8 @@ public class InScopePane extends javax.swing.JPanel {
         inScopeTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         inScopeTable.setRowSelectionAllowed(true);
         inScopeTable.setColumnSelectionAllowed(false);
-        inScopeTable.setAutoCreateRowSorter(true);
+        sorter = new TableRowSorter<TableModel>(inScopeTable.getModel());
+        inScopeTable.setRowSorter(sorter);
         inScopeTablePane.setViewportView(inScopeTable);
         inScopeTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
@@ -138,35 +187,110 @@ public class InScopePane extends javax.swing.JPanel {
 
         jButton1.setText("jButton1");
 
+        newStateCheckBox.setSelected(true);
+        newStateCheckBox.setText("New");
+        newStateCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newStateCheckBoxActionPerformed(evt);
+            }
+        });
+
+        filtersLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
+        filtersLabel.setText("Filters:");
+
+        inProgressStateCheckBox.setSelected(true);
+        inProgressStateCheckBox.setText("In Progress");
+        inProgressStateCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                inProgressStateCheckBoxActionPerformed(evt);
+            }
+        });
+
+        doneStateCheckBox.setText("Done");
+        doneStateCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                doneStateCheckBoxActionPerformed(evt);
+            }
+        });
+
+        blockedStateCheckBox.setSelected(true);
+        blockedStateCheckBox.setText("Blocked");
+        blockedStateCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                blockedStateCheckBoxActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(parentSplitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 962, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton1)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                .addComponent(parentSplitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 962, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(34, 34, 34)
+                .addComponent(filtersLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(newStateCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(inProgressStateCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(doneStateCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(blockedStateCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(12, 12, 12)
-                .addComponent(jButton1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(newStateCheckBox)
+                    .addComponent(filtersLabel)
+                    .addComponent(inProgressStateCheckBox)
+                    .addComponent(doneStateCheckBox)
+                    .addComponent(blockedStateCheckBox))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(parentSplitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 682, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void newStateCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newStateCheckBoxActionPerformed
+        applyRowFilter();
+        refresh();
+    }//GEN-LAST:event_newStateCheckBoxActionPerformed
+
+    private void inProgressStateCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inProgressStateCheckBoxActionPerformed
+        applyRowFilter();
+        refresh();
+    }//GEN-LAST:event_inProgressStateCheckBoxActionPerformed
+
+    private void doneStateCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_doneStateCheckBoxActionPerformed
+        applyRowFilter();
+        refresh();
+    }//GEN-LAST:event_doneStateCheckBoxActionPerformed
+
+    private void blockedStateCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_blockedStateCheckBoxActionPerformed
+        applyRowFilter();
+        refresh();
+    }//GEN-LAST:event_blockedStateCheckBoxActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox blockedStateCheckBox;
     private javax.swing.JTabbedPane bottomTabbedPane;
+    private javax.swing.JCheckBox doneStateCheckBox;
+    private javax.swing.JLabel filtersLabel;
+    private javax.swing.JCheckBox inProgressStateCheckBox;
     private javax.swing.JTable inScopeTable;
     private javax.swing.JScrollPane inScopeTablePane;
     private javax.swing.JButton jButton1;
+    private javax.swing.JCheckBox newStateCheckBox;
     private javax.swing.JSplitPane parentSplitPane;
     // End of variables declaration//GEN-END:variables
 

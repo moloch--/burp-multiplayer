@@ -18,13 +18,22 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="parentSplitPane" pref="962" max="32767" attributes="0"/>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="jButton1" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                  </Group>
-              </Group>
+              <Component id="parentSplitPane" pref="962" max="32767" attributes="0"/>
+          </Group>
+          <Group type="102" alignment="1" attributes="0">
+              <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
+              <Component id="filtersLabel" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="newStateCheckBox" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="inProgressStateCheckBox" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="doneStateCheckBox" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="blockedStateCheckBox" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
+              <Component id="jButton1" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -32,7 +41,14 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
-              <Component id="jButton1" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jButton1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="newStateCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="filtersLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="inProgressStateCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="doneStateCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="blockedStateCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="parentSplitPane" pref="682" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -66,13 +82,13 @@
                   <TableColumnModel selectionModel="1"/>
                 </Property>
                 <Property name="columnSelectionAllowed" type="boolean" value="true"/>
-                <Property name="selectionMode" type="int" value="0" postCode="inScopeTable.setRowSelectionAllowed(true);&#xa;inScopeTable.setColumnSelectionAllowed(false);&#xa;inScopeTable.setAutoCreateRowSorter(true);"/>
+                <Property name="selectionMode" type="int" value="0" postCode="inScopeTable.setRowSelectionAllowed(true);&#xa;inScopeTable.setColumnSelectionAllowed(false);&#xa;sorter = new TableRowSorter&lt;TableModel&gt;(inScopeTable.getModel());&#xa;inScopeTable.setRowSorter(sorter);"/>
                 <Property name="tableHeader" type="javax.swing.table.JTableHeader" editor="org.netbeans.modules.form.editors2.JTableHeaderEditor">
                   <TableHeader reorderingAllowed="true" resizingAllowed="true"/>
                 </Property>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JTable(this.multiplayer.history) {&#xa;    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {&#xa;        Component component = super.prepareRenderer(renderer, row, column);&#xa;        JComponent jComponent = (JComponent) component;&#xa;        String id = (String) this.getValueAt(row, 0);&#xa;        Color backgroundColor = multiplayer.history.getColorForId(id);&#xa;        callbacks.printOutput(String.format(&quot;Row = %d, Column = %d (%s) -&gt; %s&quot;, row, column, id, backgroundColor));&#xa;        if(!component.getBackground().equals(getSelectionBackground())) {&#xa;            component.setBackground(backgroundColor);&#xa;        }&#xa;        return component;&#xa;    }&#xa;}"/>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JTable(this.multiplayer.history) {&#xa;    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {&#xa;        Component component = super.prepareRenderer(renderer, row, column);&#xa;        JComponent jComponent = (JComponent) component;&#xa;        String id = (String) this.getValueAt(row, 0);&#xa;        Color backgroundColor = multiplayer.history.getColorForId(id);&#xa;        // callbacks.printOutput(String.format(&quot;Row = %d, Column = %d (%s) -&gt; %s&quot;, row, column, id, backgroundColor));&#xa;        if(!component.getBackground().equals(getSelectionBackground())) {&#xa;            component.setBackground(backgroundColor);&#xa;        }&#xa;        return component;&#xa;    }&#xa;}"/>
               </AuxValues>
             </Component>
           </SubComponents>
@@ -92,6 +108,49 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="jButton1"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="newStateCheckBox">
+      <Properties>
+        <Property name="selected" type="boolean" value="true"/>
+        <Property name="text" type="java.lang.String" value="New"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="newStateCheckBoxActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="filtersLabel">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name=".SF NS Text" size="13" style="1"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Filters:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="inProgressStateCheckBox">
+      <Properties>
+        <Property name="selected" type="boolean" value="true"/>
+        <Property name="text" type="java.lang.String" value="In Progress"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="inProgressStateCheckBoxActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="doneStateCheckBox">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Done"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="doneStateCheckBoxActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="blockedStateCheckBox">
+      <Properties>
+        <Property name="selected" type="boolean" value="true"/>
+        <Property name="text" type="java.lang.String" value="Blocked"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="blockedStateCheckBoxActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>
