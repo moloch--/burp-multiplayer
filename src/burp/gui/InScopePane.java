@@ -32,7 +32,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 
@@ -167,6 +166,21 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
         final JPopupMenu contextMenu = new JPopupMenu();
         
         contextMenu.add(initSendToMenu());
+
+        // Active Scan
+        JMenuItem activeScanItem = new JMenuItem("Active Scan");
+        activeScanItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
+                MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
+                Boolean useHttps = reqResp.getProtocol().toLowerCase() == "https";
+                callbacks.doActiveScan(reqResp.getHost(), reqResp.getPort(), useHttps, reqResp.getRequest());  
+            }
+            
+        });
+        contextMenu.add(activeScanItem);
         
         // Delete
         JMenuItem deleteItem = new JMenuItem("Delete");
@@ -219,7 +233,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
                 String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
                 MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
                 Boolean useHttps = reqResp.getProtocol().toLowerCase() == "https";
-                callbacks.sendToRepeater(reqResp.getHost(), reqResp.getPort(), useHttps, reqResp.getRequest(), "");
+                callbacks.sendToRepeater(reqResp.getHost(), reqResp.getPort(), useHttps, reqResp.getRequest(), "From Multiplayer");
             }
             
         });
@@ -266,7 +280,22 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
             }
             
         });
-        sendToMenu.add(sendToComparerRespItem);   
+        sendToMenu.add(sendToComparerRespItem);
+        
+        // Spider
+        JMenuItem sendToSpiderItem = new JMenuItem("Spider");
+        sendToSpiderItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
+                MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
+                callbacks.sendToSpider(reqResp.getURL(callbacks.getHelpers()));
+            }
+            
+        });
+        sendToMenu.add(sendToSpiderItem);
+        
         
         return sendToMenu;
     }
