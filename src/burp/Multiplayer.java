@@ -186,7 +186,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             URL url = reqInfo.getUrl();
             
             // Ignore tools? TODO: Make configurable
-            if (toolFlag == 0x00000010) {
+            if (toolFlag == IBurpExtenderCallbacks.TOOL_SCANNER) {
                 callbacks.printOutput(String.format("Ignore: tools (%d)", toolFlag));
                 return;
             }
