@@ -92,6 +92,10 @@ public class HTTPHistory extends AbstractTableModel {
         }
     }
     
+    public int size() {
+        return history.size();
+    }
+    
     public void registerOnEditCallback(OnEditCallback callback) {
         onEditCallbacks.add(callback);
     }
@@ -209,7 +213,7 @@ public class HTTPHistory extends AbstractTableModel {
     }
     
     public int getProgress() {
-        if (history.isEmpty()) {
+        if (this.size() < 1) {
             return 0; // Avoid divide by zero
         }
         float done = 0;

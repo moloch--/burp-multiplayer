@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.swing.DefaultListModel;
 
 /**
  *
@@ -29,8 +30,17 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     private ExecutorService executor = Executors.newFixedThreadPool(4);
 
     private Boolean respectScope = true;
-    private Set<String> ignoredExtensions = new HashSet<String>();
-    private Set<Integer> ignoredStatusCodes = new HashSet<Integer>();
+    private Boolean ignoreTools = true;
+    
+    private DefaultListModel<String> ignoredExtensions = new DefaultListModel<>();
+    private List<String> defaultIgnoredExtensions = new ArrayList<String>(Arrays.asList(
+        "js", "woff", "woff2", "jpg", "jpeg", "png", "gif", "css", "txt"
+    ));
+    
+    private DefaultListModel<String> ignoredStatusCodes = new DefaultListModel<>();
+    private final List<String> defaultIgnoredStatusCodes = new ArrayList<String>(Arrays.asList(
+        "404"
+    ));
 
     public HTTPHistory history;
 
@@ -39,6 +49,13 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         this.history = new HTTPHistory(executor, callbacks);
         this.callbacks = callbacks;
         this.helpers = callbacks.getHelpers();
+        
+        defaultIgnoredExtensions.forEach(ext -> {
+            ignoredExtensions.addElement(ext);
+        });
+        defaultIgnoredStatusCodes.forEach(code -> {
+            ignoredStatusCodes.addElement(code);
+        });
     }
     
     // Database = Project Name
@@ -71,9 +88,8 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
                         history.remove(msg.getOldVal().getId());
                     }
                 }
-                
             });
-            
+            callbacks.printOutput("Connected!");
             return true;
         } else {
             return false;
@@ -118,8 +134,8 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     }
     
     // Ignored File Extensions
-    public String[] getIgnoreExtensions() {
-        return (String[]) ignoredExtensions.toArray();
+    public DefaultListModel<String> getIgnoreExtensions() {
+        return ignoredExtensions;
     }
     
     public Boolean isIgnoredExtension(String fileExtension) {
@@ -127,39 +143,73 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     }
     
     public void addIgnoredExtension(String fileExtension) {
-        ignoredExtensions.add(fileExtension.toLowerCase());
+        ignoredExtensions.addElement(fileExtension.toLowerCase());
     }
     
     public void removeIgnoredExtension(String fileExtension) {
-        ignoredExtensions.remove(fileExtension.toLowerCase());
+        int index = ignoredExtensions.indexOf(fileExtension);
+        ignoredExtensions.remove(index);
     }
     
     // Ignored Status Codes
-    public Integer[] getIgnoredStatusCodes() {
-        return (Integer[]) ignoredStatusCodes.toArray();
+    public DefaultListModel<String> getIgnoredStatusCodes() {        
+        return ignoredStatusCodes;
     }
     
-    public Boolean isIgnoredStatusCodes(Integer statusCode) {
-        return ignoredStatusCodes.contains(statusCode);
+    public Boolean isIgnoredStatusCode(short statusCode) {
+        return ignoredStatusCodes.contains(String.format("%d", statusCode));
     }
     
-    public void addIgnoredStatusCodes(Integer statusCode) {
-        ignoredStatusCodes.add(statusCode);
+    public void addIgnoredStatusCodes(String statusCode) {
+        try {
+            Integer code = Integer.parseInt(statusCode);
+            if (code < 0 || 999 < code) {
+                return;
+            }
+            ignoredStatusCodes.addElement(statusCode);
+        } catch(NumberFormatException e) {
+            return;
+        }
     }
     
-    public void removeIgnoredStatusCodes(Integer statusCode) {
-        ignoredStatusCodes.remove(statusCode);
+    public void removeIgnoredStatusCodes(String statusCode) {
+        int index = ignoredStatusCodes.indexOf(statusCode);
+        ignoredStatusCodes.remove(index);
     }
 
     // Burp HTTP Callback
     @Override
-    public void processHttpMessage(int toolFlag, boolean messageIsRequest, IHttpRequestResponse reqResp) { 
+    public void processHttpMessage(int toolFlag, boolean messageIsRequest, IHttpRequestResponse burpReqResp) { 
         if (!messageIsRequest) {
-            IRequestInfo reqInfo = helpers.analyzeRequest(reqResp);
+            IRequestInfo reqInfo = helpers.analyzeRequest(burpReqResp);
+            IResponseInfo respInfo = helpers.analyzeResponse(burpReqResp.getResponse());
             URL url = reqInfo.getUrl();
-            if (!respectScope || callbacks.isInScope(url)) {
-                http().insert(reqRespToRethink(reqResp)).run(dbConn);
+            
+            // Ignore tools? TODO: Make configurable
+            if (toolFlag == 0x00000010) {
+                callbacks.printOutput(String.format("Ignore: tools (%d)", toolFlag));
+                return;
             }
+            
+            // Is in-scope?
+            if (respectScope && !callbacks.isInScope(url)) {
+                callbacks.printOutput("Ignore: scope");
+                return;
+            }
+            
+            // Is ignored response status?
+            if (isIgnoredStatusCode(respInfo.getStatusCode())) {
+                callbacks.printOutput(String.format("Ignore: status code (%d)", respInfo.getStatusCode()));
+                return;
+            }
+            
+            // Is ignored file extension?
+            if (isIgnoredExtension(getFileExtension(url))) {
+                callbacks.printOutput(String.format("Ignore: file ext (%s)", getFileExtension(url)));
+                return;
+            }
+
+            http().insert(reqRespToRethink(burpReqResp)).run(dbConn);
         }
     }
     
@@ -206,6 +256,15 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     @Override
     public void onEdit(String id, String field, Object value) {
         http().get(id).update(r.hashMap(field.toLowerCase(), value)).run(dbConn);
+    }
+    
+    private String getFileExtension(URL url) {
+        String path = url.getPath();
+        int index = path.lastIndexOf(".") + 1;
+        if (index < path.length()) {
+            return path.substring(index);
+        }
+        return "";
     }
     
     // Loggers

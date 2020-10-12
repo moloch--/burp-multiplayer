@@ -29,8 +29,9 @@ public class MainPanel extends javax.swing.JPanel {
         InScopePane inScopePane = new InScopePane(multiplayer, callbacks);
         this.mainTabbedPane.addTab("In-Scope", inScopePane);
         
-        OptionsPane optionsPane = new OptionsPane();
+        OptionsPane optionsPane = new OptionsPane(multiplayer, callbacks);
         this.mainTabbedPane.addTab("Options", optionsPane);
+        callbacks.printOutput("Main panel initialized");
     }
 
     /**

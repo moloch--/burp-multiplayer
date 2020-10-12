@@ -51,6 +51,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
      * Creates new form InScopePane
      */
     public InScopePane(Multiplayer multiplayer, IBurpExtenderCallbacks callbacks) {
+        callbacks.printOutput("Initializing in-scope panel");
         this.callbacks = callbacks;
         this.multiplayer = multiplayer;
         initComponents();
@@ -91,17 +92,25 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
             }
         };
         inScopeTable.getSelectionModel().addListSelectionListener(rowSelectionListener);
+
         applyRowFilter();
         updateStateProgress();
         initContextMenu();
         refresh();
+        
+        callbacks.printOutput("in-scope panel initialized!");
     }
     
     private void applyRowFilter() {
-
+        callbacks.printOutput(String.format("applyRowFilter %d ...", multiplayer.history.size()));
+        if (multiplayer.history.size() < 1) {
+            callbacks.printOutput("applyRowFilter (0)");
+            return;
+        }
         sorter.setRowFilter(new RowFilter<TableModel, Integer>() {
             
             public boolean include(Entry<? extends TableModel, ? extends Integer> entry) {
+                callbacks.printOutput("applyRowFilter->include");
                 Integer rowNumber = entry.getIdentifier();
                 TableModel model = entry.getModel();
                 int assessmentColumnIndex = multiplayer.history.columns.indexOf(multiplayer.history.Assessment);
@@ -110,6 +119,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
             }
             
         });
+        callbacks.printOutput("applyRowFilter (done)");
     }
         
     private List<String> getEnabledFilters() {
@@ -132,9 +142,12 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
     public void refresh() {
         this.repaint();
         this.revalidate();
+        this.inScopeTable.repaint();
+        this.inScopeTable.revalidate();
     }
     
     public void displayMessageEditorFor(String reqRespId) {
+        callbacks.printOutput("displayMessageEditorFor");
         MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
         
         // Save active tab
@@ -157,12 +170,17 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
     }
     
     public void updateStateProgress() {
+        callbacks.printOutput("Update progress");
         int progress = multiplayer.history.getProgress();
+        callbacks.printOutput(String.format("Update progress = %d", progress));
         stateProgressBar.setValue(progress);
         refresh();
+        callbacks.printOutput("Update progress, done!");
     }
     
     public void initContextMenu() {
+        callbacks.printOutput("initContextMenu");
+        
         final JPopupMenu contextMenu = new JPopupMenu();
         
         contextMenu.add(initSendToMenu());
@@ -221,6 +239,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
     }
     
     public JMenu initSendToMenu() {
+        callbacks.printOutput("initSendToMenu");
         JMenu sendToMenu = new JMenu("Send To");
         
 
