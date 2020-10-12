@@ -59,6 +59,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
         // Hide ID column
         inScopeTable.getColumnModel().getColumn(0).setMinWidth(0);
         inScopeTable.getColumnModel().getColumn(0).setMaxWidth(0);
+        
 
         // Highlight column
         int highlightColumnIndex = multiplayer.history.columns.indexOf(multiplayer.history.Highlight);
@@ -106,7 +107,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
         if (multiplayer.history.size() < 1) {
             callbacks.printOutput("applyRowFilter (0)");
             return;
-        }
+        }        
         sorter.setRowFilter(new RowFilter<TableModel, Integer>() {
             
             public boolean include(Entry<? extends TableModel, ? extends Integer> entry) {
@@ -142,8 +143,6 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
     public void refresh() {
         this.repaint();
         this.revalidate();
-        this.inScopeTable.repaint();
-        this.inScopeTable.revalidate();
     }
     
     public void displayMessageEditorFor(String reqRespId) {
@@ -193,7 +192,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
             public void actionPerformed(ActionEvent e) {
                 String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
                 MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
-                Boolean useHttps = reqResp.getProtocol().toLowerCase() == "https";
+                Boolean useHttps = "https".equals(reqResp.getProtocol().toLowerCase());
                 callbacks.doActiveScan(reqResp.getHost(), reqResp.getPort(), useHttps, reqResp.getRequest());  
             }
             
@@ -251,7 +250,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
             public void actionPerformed(ActionEvent e) {
                 String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
                 MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
-                Boolean useHttps = reqResp.getProtocol().toLowerCase() == "https";
+                Boolean useHttps = "https".equals(reqResp.getProtocol().toLowerCase());
                 callbacks.sendToRepeater(reqResp.getHost(), reqResp.getPort(), useHttps, reqResp.getRequest(), "From Multiplayer");
             }
             
@@ -266,7 +265,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
             public void actionPerformed(ActionEvent e) {
                 String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
                 MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
-                Boolean useHttps = reqResp.getProtocol().toLowerCase() == "https";
+                Boolean useHttps = "https".equals(reqResp.getProtocol().toLowerCase());
                 callbacks.sendToIntruder(reqResp.getHost(), reqResp.getPort(), useHttps, reqResp.getRequest());
             }
             
