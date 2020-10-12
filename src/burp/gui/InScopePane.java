@@ -61,9 +61,10 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
         inScopeTable.getColumnModel().getColumn(0).setMinWidth(0);
         inScopeTable.getColumnModel().getColumn(0).setMaxWidth(0);
         
+        setMinColumnWidths();
 
         // Highlight column
-        int highlightColumnIndex = multiplayer.history.columns.indexOf(multiplayer.history.Highlight);
+        int highlightColumnIndex = multiplayer.history.columns.indexOf(HTTPHistory.Highlight);
         TableColumn highlightColumn = inScopeTable.getColumnModel().getColumn(highlightColumnIndex);
         JComboBox highlightComboBox = new JComboBox();
         for (String colorName : multiplayer.history.highlights) {
@@ -72,7 +73,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
         highlightColumn.setCellEditor(new DefaultCellEditor(highlightComboBox));
 
         // Assessment column
-        int assessmentColumnIndex = multiplayer.history.columns.indexOf(multiplayer.history.Assessment);
+        int assessmentColumnIndex = multiplayer.history.columns.indexOf(HTTPHistory.Assessment);
         TableColumn assessmentColumn = inScopeTable.getColumnModel().getColumn(assessmentColumnIndex);
         JComboBox assessmentStateComboBox = new JComboBox();
         for (String state : multiplayer.history.assessmentStates) {
@@ -102,6 +103,50 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
         refresh();
         
         callbacks.printOutput("in-scope panel initialized!");
+    }
+
+    private void setMinColumnWidths() {
+        // Assessment
+        int assessmentIndex = HTTPHistory.columns.indexOf(HTTPHistory.Assessment);
+        inScopeTable.getColumnModel().getColumn(assessmentIndex).setMinWidth(100);
+        
+        // Method
+        int methodIndex = HTTPHistory.columns.indexOf(HTTPHistory.Method);
+        inScopeTable.getColumnModel().getColumn(methodIndex).setMinWidth(75);
+        inScopeTable.getColumnModel().getColumn(methodIndex).setPreferredWidth(75);
+
+        // Protocol
+        int protocolIndex = HTTPHistory.columns.indexOf(HTTPHistory.Protocol);
+        inScopeTable.getColumnModel().getColumn(protocolIndex).setMinWidth(75);
+        
+        // Host
+        int hostIndex = HTTPHistory.columns.indexOf(HTTPHistory.Host);
+        inScopeTable.getColumnModel().getColumn(hostIndex).setMinWidth(75);
+        
+        // Path
+        int pathIndex = HTTPHistory.columns.indexOf(HTTPHistory.Path);
+        inScopeTable.getColumnModel().getColumn(pathIndex).setMinWidth(75);
+        
+        // Port
+        int portIndex = HTTPHistory.columns.indexOf(HTTPHistory.Port);
+        inScopeTable.getColumnModel().getColumn(portIndex).setMinWidth(50);
+        inScopeTable.getColumnModel().getColumn(portIndex).setPreferredWidth(50);
+
+        // Status Code
+        int statusCodeIndex = HTTPHistory.columns.indexOf(HTTPHistory.StatusCode);
+        inScopeTable.getColumnModel().getColumn(statusCodeIndex).setMinWidth(100);
+        
+        // Comment
+        int commentIndex = HTTPHistory.columns.indexOf(HTTPHistory.Comment);
+        inScopeTable.getColumnModel().getColumn(commentIndex).setMinWidth(100);
+        
+        // Highlight
+        int highlightIndex = HTTPHistory.columns.indexOf(HTTPHistory.Highlight);
+        inScopeTable.getColumnModel().getColumn(highlightIndex).setMinWidth(100);
+        
+        // Date / Time
+        int dateTimeIndex = HTTPHistory.columns.indexOf(HTTPHistory.DateTime);
+        inScopeTable.getColumnModel().getColumn(dateTimeIndex).setMinWidth(100);
     }
     
     private void applyRowFilter() {
@@ -344,11 +389,19 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
                 Component component = super.prepareRenderer(renderer, row, column);
                 JComponent jComponent = (JComponent) component;
+
+                // Handle row colors
                 String id = (String) this.getValueAt(row, 0);
                 Color backgroundColor = multiplayer.history.getColorForId(id);
                 if(!component.getBackground().equals(getSelectionBackground())) {
                     component.setBackground(backgroundColor);
                 }
+
+                // Handle column width
+                int rendererWidth = component.getPreferredSize().width;
+                TableColumn tableColumn = getColumnModel().getColumn(column);
+                tableColumn.setPreferredWidth(Math.max(rendererWidth + getIntercellSpacing().width, tableColumn.getPreferredWidth()));
+
                 return component;
             }
         };
@@ -364,6 +417,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
 
         parentSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
+        inScopeTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         inScopeTable.setColumnSelectionAllowed(true);
         inScopeTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         inScopeTable.setRowSelectionAllowed(true);
@@ -440,7 +494,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
                 .addComponent(doneStateCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(blockedStateCheckBox)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(stateProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -459,8 +513,8 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
                     .addComponent(inProgressStateCheckBox)
                     .addComponent(doneStateCheckBox)
                     .addComponent(blockedStateCheckBox)
-                    .addComponent(stateProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
+                    .addComponent(jLabel1)
+                    .addComponent(stateProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(parentSplitPane, javax.swing.GroupLayout.DEFAULT_SIZE, 682, Short.MAX_VALUE)
                 .addContainerGap())

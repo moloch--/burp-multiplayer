@@ -31,7 +31,7 @@
               <Component id="doneStateCheckBox" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="blockedStateCheckBox" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="stateProgressBar" min="-2" max="-2" attributes="0"/>
@@ -52,8 +52,8 @@
                   <Component id="inProgressStateCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="doneStateCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="blockedStateCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="stateProgressBar" alignment="1" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="stateProgressBar" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="parentSplitPane" pref="682" max="32767" attributes="0"/>
@@ -84,6 +84,7 @@
           <SubComponents>
             <Component class="javax.swing.JTable" name="inScopeTable">
               <Properties>
+                <Property name="autoResizeMode" type="int" value="0"/>
                 <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
                   <TableColumnModel selectionModel="1"/>
                 </Property>
@@ -94,7 +95,7 @@
                 </Property>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JTable(this.multiplayer.history) {&#xa;    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {&#xa;        Component component = super.prepareRenderer(renderer, row, column);&#xa;        JComponent jComponent = (JComponent) component;&#xa;        String id = (String) this.getValueAt(row, 0);&#xa;        Color backgroundColor = multiplayer.history.getColorForId(id);&#xa;        if(!component.getBackground().equals(getSelectionBackground())) {&#xa;            component.setBackground(backgroundColor);&#xa;        }&#xa;        return component;&#xa;    }&#xa;}"/>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JTable(this.multiplayer.history) {&#xa;    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {&#xa;        Component component = super.prepareRenderer(renderer, row, column);&#xa;        JComponent jComponent = (JComponent) component;&#xa;&#xa;        // Handle row colors&#xa;        String id = (String) this.getValueAt(row, 0);&#xa;        Color backgroundColor = multiplayer.history.getColorForId(id);&#xa;        if(!component.getBackground().equals(getSelectionBackground())) {&#xa;            component.setBackground(backgroundColor);&#xa;        }&#xa;&#xa;        // Handle column width&#xa;        int rendererWidth = component.getPreferredSize().width;&#xa;        TableColumn tableColumn = getColumnModel().getColumn(column);&#xa;        tableColumn.setPreferredWidth(Math.max(rendererWidth + getIntercellSpacing().width, tableColumn.getPreferredWidth()));&#xa;&#xa;        return component;&#xa;    }&#xa;}"/>
               </AuxValues>
             </Component>
           </SubComponents>
