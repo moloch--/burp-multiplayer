@@ -5,6 +5,7 @@
  */
 package burp.gui;
 
+import burp.HTTPHistory;
 import burp.HTTPMessageEditor;
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
@@ -89,6 +90,7 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
                 if (!event.getValueIsAdjusting()) {
                     String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
                     displayMessageEditorFor(reqRespId);
+                    updateAvailibleFilters(reqRespId);
                 }
             }
         };
@@ -163,6 +165,15 @@ public class InScopePane extends javax.swing.JPanel implements TableModelListene
         bottomTabbedPane.setSelectedIndex(selectedTabIndex);
     }
     
+    public void updateAvailibleFilters(String reqRespId) {
+        String state = multiplayer.history.getById(reqRespId).getAssessment();
+        newStateCheckBox.setEnabled(!state.equals(HTTPHistory.New));
+        doneStateCheckBox.setEnabled(!state.equals(HTTPHistory.Done));
+        inProgressStateCheckBox.setEnabled(!state.equals(HTTPHistory.InProgress));
+        blockedStateCheckBox.setEnabled(!state.equals(HTTPHistory.Blocked));
+    }
+    
+    @Override
     public void tableChanged(TableModelEvent event) {
         callbacks.printOutput("Table changed (InScopePanel)");
         updateStateProgress();
