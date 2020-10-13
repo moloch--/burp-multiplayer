@@ -27,7 +27,17 @@ public class OptionsPane extends javax.swing.JPanel {
         this.multiplayer = multiplayer;
         this.callbacks = callbacks;
         initComponents();
-        callbacks.printOutput("Options panel initialized");
+
+    }
+
+    private void saveExtensionSetting(String name, String value) {
+        String key = String.format("multiplayer.%s.%s", this.getClass().getName(), name);
+        callbacks.saveExtensionSetting(key, value);
+    }
+    
+    private String loadExtensionSetting(String name) {
+        String key = String.format("multiplayer.%s.%s", this.getClass().getName(), name);
+        return callbacks.loadExtensionSetting(key);
     }
 
     /**

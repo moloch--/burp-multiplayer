@@ -33,7 +33,7 @@ public class BurpExtender implements IBurpExtender, ITab {
     
     public void main() {
         try {
-            callbacks.printOutput("Main()");
+
             BurpExtender.multiplayer = new Multiplayer(this, callbacks);
             
             // Root Panel
@@ -42,7 +42,7 @@ public class BurpExtender implements IBurpExtender, ITab {
             }
             
             // ConnectionPanel
-            ConnectionPanel connectionPanel = new ConnectionPanel(multiplayer);
+            ConnectionPanel connectionPanel = new ConnectionPanel(multiplayer, callbacks);
             BurpExtender.rootPanel.add(connectionPanel);
             
             connectionPanel.onConnection(() -> {

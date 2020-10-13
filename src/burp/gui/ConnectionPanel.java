@@ -5,6 +5,7 @@
  */
 package burp.gui;
 
+import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
 import java.util.*;
 import javax.swing.JOptionPane;
@@ -16,25 +17,58 @@ import javax.swing.JOptionPane;
 public class ConnectionPanel extends javax.swing.JPanel {
 
     private Multiplayer multiplayer;
-    private List<Runnable> callbacks = new ArrayList<Runnable>();
+    private List<Runnable> onConnectCallbacks = new ArrayList<Runnable>();
+    private IBurpExtenderCallbacks callbacks;
     
     /**
      * Creates new form ConnectionPanel
      */
-    public ConnectionPanel(Multiplayer multiplayer) {
+    public ConnectionPanel(Multiplayer multiplayer, IBurpExtenderCallbacks callbacks) {
+        this.callbacks = callbacks;
         this.multiplayer = multiplayer;
         initComponents();
-        connectButton.setEnabled(false);
+        initLoadSettings();
+        if (projectNameTextField.getText().isBlank() || projectNameTextField.getText().isEmpty()) {
+            connectButton.setEnabled(false);
+        }
+    }
+    
+    public void initLoadSettings() {
+        String projectName = loadExtensionSetting("projectName");
+        if (projectName != null) {
+            projectNameTextField.setText(projectName);
+        }
+        String hostname = loadExtensionSetting("hostname");
+        if (hostname != null) {
+            hostnameTextField.setText(hostname);
+        }
+        String port = loadExtensionSetting("port");
+        if (port != null) {
+            try {
+                Integer.parseInt(port);
+                portNumberTextField.setText(port);
+            } catch (NumberFormatException e) {}
+        }
     }
     
     public void onConnection(Runnable callback) {
-        this.callbacks.add(callback);
+        onConnectCallbacks.add(callback);
     }
     
     private void triggerOnConnection() {
-        for (Runnable callback : this.callbacks) {
+        for (Runnable callback : onConnectCallbacks) {
             callback.run();
         }
+    }
+    
+    private void saveExtensionSetting(String name, String value) {
+        String key = String.format("multiplayer.%s.%s", this.getClass().getName(), name);
+        callbacks.saveExtensionSetting(key, value);
+    }
+    
+    private String loadExtensionSetting(String name) {
+        String key = String.format("multiplayer.%s.%s", this.getClass().getName(), name);
+        return callbacks.loadExtensionSetting(key);
     }
 
     /**
@@ -96,7 +130,7 @@ public class ConnectionPanel extends javax.swing.JPanel {
         });
 
         saveSettingsCheckBox.setSelected(true);
-        saveSettingsCheckBox.setText("Save Settings to Project");
+        saveSettingsCheckBox.setText("Save Connection Settings");
         saveSettingsCheckBox.setToolTipText("");
         saveSettingsCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -160,8 +194,7 @@ public class ConnectionPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_hostnameTextFieldActionPerformed
 
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
-        // TODO add your handling code here:
-        
+
         this.connectButton.setEnabled(false);
         
         String hostname = this.hostnameTextField.getText();
@@ -170,6 +203,13 @@ public class ConnectionPanel extends javax.swing.JPanel {
         try {
             Boolean connected = this.multiplayer.Connect(hostname, port, projectName);
             if (connected) {
+                
+                if (saveSettingsCheckBox.isSelected()) {
+                    saveExtensionSetting("projectName", projectName);
+                    saveExtensionSetting("hostname", hostname);
+                    saveExtensionSetting("port", String.format("%d", port));
+                }
+                
                 this.triggerOnConnection();
             }
         } catch (Exception err) {

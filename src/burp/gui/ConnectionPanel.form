@@ -133,7 +133,7 @@
     <Component class="javax.swing.JCheckBox" name="saveSettingsCheckBox">
       <Properties>
         <Property name="selected" type="boolean" value="true"/>
-        <Property name="text" type="java.lang.String" value="Save Settings to Project"/>
+        <Property name="text" type="java.lang.String" value="Save Connection Settings"/>
         <Property name="toolTipText" type="java.lang.String" value=""/>
       </Properties>
       <Events>
