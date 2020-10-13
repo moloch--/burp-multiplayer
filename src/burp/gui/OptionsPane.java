@@ -7,8 +7,12 @@ package burp.gui;
 
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 import javax.swing.JOptionPane;
+import com.fasterxml.jackson.databind.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -27,7 +31,34 @@ public class OptionsPane extends javax.swing.JPanel {
         this.multiplayer = multiplayer;
         this.callbacks = callbacks;
         initComponents();
-
+        initLoadSettings();
+    }
+    
+    private void initLoadSettings() {
+        String theImplication = loadExtensionSetting("sendToImpliesInProgress");
+        if (theImplication != null) {
+            if ("1".equals(theImplication)) {
+                multiplayer.setSendToImpliesInProgress(true);
+                sendToInProgressCheckBox.setSelected(true);
+            } else {
+                multiplayer.setSendToImpliesInProgress(false);
+                sendToInProgressCheckBox.setSelected(false);
+            }
+        }
+        
+        String ignoreScanner = loadExtensionSetting("ignoreScanner");
+        if (ignoreScanner != null) {
+            if ("1".equals(ignoreScanner)) {
+                multiplayer.setIgnoreScanner(true);
+                ignoreScannerCheckBox.setSelected(true);
+            } else {
+                multiplayer.setIgnoreScanner(false);
+                ignoreScannerCheckBox.setSelected(false);
+            }
+        }
+        
+        loadIgnoredFileExtensionList();
+        loadIgnoredStatusCodesList();
     }
 
     private void saveExtensionSetting(String name, String value) {
@@ -39,7 +70,59 @@ public class OptionsPane extends javax.swing.JPanel {
         String key = String.format("multiplayer.%s.%s", this.getClass().getName(), name);
         return callbacks.loadExtensionSetting(key);
     }
+    
+    private void saveIgnoredFileExtensionList() {
+        List<String> ignoredFileExts = multiplayer.getIgnoredFileExtensionsList();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String json = objectMapper.writeValueAsString(ignoredFileExts);
+            saveExtensionSetting("ignoredFileExtensions", json);
+        } catch (JsonProcessingException err) {
+            callbacks.printError(err.toString());
+        }
+    }
+    
+    private void loadIgnoredFileExtensionList() {
+        String json = loadExtensionSetting("ignoredFileExtensions");
+        if (json != null && !json.isBlank() && !json.isEmpty()) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                List<String> ignoredFileExts = objectMapper.readValue(json, List.class);
+                multiplayer.clearIgnoredExtensions();
+                ignoredFileExts.forEach(ext -> multiplayer.addIgnoredExtension(ext));
+            } catch (JsonProcessingException err) {
+                callbacks.printError(err.toString());
+                saveExtensionSetting("ignoredFileExtensions", null);
+            }
+        }
+    }
 
+    private void saveIgnoredStatusCodesList() {
+        List<String> ignoredStatusCodes = multiplayer.getIgnoredStatusCodesList();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String json = objectMapper.writeValueAsString(ignoredStatusCodes);
+            saveExtensionSetting("ignoredStatusCodes", json);
+        } catch (JsonProcessingException err) {
+            callbacks.printError(err.toString());
+        }
+    }
+    
+    private void loadIgnoredStatusCodesList() {
+        String json = loadExtensionSetting("ignoredStatusCodes");
+        if (json != null && !json.isBlank() && !json.isEmpty()) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                List<String> ignoredFileExts = objectMapper.readValue(json, List.class);
+                multiplayer.clearIgnoredStatusCodes();
+                ignoredFileExts.forEach(code -> multiplayer.addIgnoredStatusCodes(code));
+            } catch (JsonProcessingException err) {
+                callbacks.printError(err.toString());
+                saveExtensionSetting("ignoredStatusCodes", null);
+            }
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -51,9 +134,9 @@ public class OptionsPane extends javax.swing.JPanel {
 
         ignoreFileExtensionLabel = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        ignoreFileExtensionList = new javax.swing.JList<>();
+        ignoredFileExtensionJList = new javax.swing.JList<>();
         jScrollPane2 = new javax.swing.JScrollPane();
-        ignoreStatusCodesList = new javax.swing.JList<>();
+        ignoredStatusCodesJList = new javax.swing.JList<>();
         ignoreStatusCodesLabel = new javax.swing.JLabel();
         addIgnoreFileExtensionButton = new javax.swing.JButton();
         removeIgnoreFileExtensionButton = new javax.swing.JButton();
@@ -67,13 +150,13 @@ public class OptionsPane extends javax.swing.JPanel {
         ignoreFileExtensionLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
         ignoreFileExtensionLabel.setText("Ignore File Extensions");
 
-        ignoreFileExtensionList.setModel(multiplayer.getIgnoreExtensions()
+        ignoredFileExtensionJList.setModel(multiplayer.getIgnoreExtensions()
         );
-        jScrollPane1.setViewportView(ignoreFileExtensionList);
+        jScrollPane1.setViewportView(ignoredFileExtensionJList);
 
-        ignoreStatusCodesList.setModel(multiplayer.getIgnoredStatusCodes()
+        ignoredStatusCodesJList.setModel(multiplayer.getIgnoredStatusCodes()
         );
-        jScrollPane2.setViewportView(ignoreStatusCodesList);
+        jScrollPane2.setViewportView(ignoredStatusCodesJList);
 
         ignoreStatusCodesLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
         ignoreStatusCodesLabel.setText("Ignore Status Codes");
@@ -204,29 +287,35 @@ public class OptionsPane extends javax.swing.JPanel {
     private void addIgnoreFileExtensionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addIgnoreFileExtensionButtonActionPerformed
         String fileExt = JOptionPane.showInputDialog("Add file extension:");
         multiplayer.addIgnoredExtension(fileExt);
+        saveIgnoredFileExtensionList();
     }//GEN-LAST:event_addIgnoreFileExtensionButtonActionPerformed
 
     private void addIgnoreStatusCodeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addIgnoreStatusCodeButtonActionPerformed
         String status = JOptionPane.showInputDialog("Add status code:");
         multiplayer.addIgnoredStatusCodes(status);
+        saveIgnoredStatusCodesList();
     }//GEN-LAST:event_addIgnoreStatusCodeButtonActionPerformed
 
     private void removeIgnoreFileExtensionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeIgnoreFileExtensionButtonActionPerformed
-        List<String> selectedValues = ignoreFileExtensionList.getSelectedValuesList();
+        List<String> selectedValues = ignoredFileExtensionJList.getSelectedValuesList();
         selectedValues.forEach((ext) -> {
             multiplayer.removeIgnoredExtension(ext);
         });
+        saveIgnoredFileExtensionList();
     }//GEN-LAST:event_removeIgnoreFileExtensionButtonActionPerformed
 
     private void removeIgnoreStatusCodeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeIgnoreStatusCodeButtonActionPerformed
-        List<String> selectedValues = ignoreStatusCodesList.getSelectedValuesList();
+        List<String> selectedValues = ignoredStatusCodesJList.getSelectedValuesList();
         selectedValues.forEach((code) -> {
             multiplayer.removeIgnoredStatusCodes(code);
         });
+        saveIgnoredStatusCodesList();
     }//GEN-LAST:event_removeIgnoreStatusCodeButtonActionPerformed
 
     private void ignoreScannerCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ignoreScannerCheckBoxActionPerformed
         multiplayer.setIgnoreScanner(ignoreScannerCheckBox.isSelected());
+        String ignoreScanner = ignoreScannerCheckBox.isSelected() ? "1" : "0";
+        saveExtensionSetting("ignoreScanner", ignoreScanner);
     }//GEN-LAST:event_ignoreScannerCheckBoxActionPerformed
 
     private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectButtonActionPerformed
@@ -235,6 +324,8 @@ public class OptionsPane extends javax.swing.JPanel {
 
     private void sendToInProgressCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendToInProgressCheckBoxActionPerformed
         multiplayer.setSendToImpliesInProgress(sendToInProgressCheckBox.isSelected());
+        String theImplication = sendToInProgressCheckBox.isSelected() ? "1" : "0";
+        saveExtensionSetting("sendToImpliesInProgress", theImplication);
     }//GEN-LAST:event_sendToInProgressCheckBoxActionPerformed
 
 
@@ -243,10 +334,10 @@ public class OptionsPane extends javax.swing.JPanel {
     private javax.swing.JButton addIgnoreStatusCodeButton;
     private javax.swing.JButton disconnectButton;
     private javax.swing.JLabel ignoreFileExtensionLabel;
-    private javax.swing.JList<String> ignoreFileExtensionList;
     private javax.swing.JCheckBox ignoreScannerCheckBox;
     private javax.swing.JLabel ignoreStatusCodesLabel;
-    private javax.swing.JList<String> ignoreStatusCodesList;
+    private javax.swing.JList<String> ignoredFileExtensionJList;
+    private javax.swing.JList<String> ignoredStatusCodesJList;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel otherOptionsLabel;

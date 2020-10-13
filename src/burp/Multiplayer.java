@@ -167,6 +167,10 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         ignoredExtensions.remove(index);
     }
     
+    public void clearIgnoredExtensions() {
+        ignoredExtensions.removeAllElements();
+    }
+    
     // Ignored Status Codes
     public DefaultListModel<String> getIgnoredStatusCodes() {        
         return ignoredStatusCodes;
@@ -191,6 +195,10 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     public void removeIgnoredStatusCodes(String statusCode) {
         int index = ignoredStatusCodes.indexOf(statusCode);
         ignoredStatusCodes.remove(index);
+    }
+    
+    public void clearIgnoredStatusCodes() {
+        ignoredStatusCodes.removeAllElements();
     }
 
     // Burp HTTP Callback
@@ -281,6 +289,24 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             return path.substring(index);
         }
         return "";
+    }
+    
+    public List<String> getIgnoredFileExtensionsList() {
+        List<String> ignoredExtsList = new ArrayList();
+        Iterator<String> iter = ignoredExtensions.elements().asIterator();
+        while (iter.hasNext()) {
+            ignoredExtsList.add(iter.next());
+        }
+        return ignoredExtsList;
+    }
+    
+    public List<String> getIgnoredStatusCodesList() {
+        List<String> ignoredStatusCodesList = new ArrayList();
+        Iterator<String> iter = ignoredStatusCodes.elements().asIterator();
+        while (iter.hasNext()) {
+            ignoredStatusCodesList.add(iter.next());
+        }
+        return ignoredStatusCodesList;
     }
     
     // Loggers
