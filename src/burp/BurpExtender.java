@@ -4,6 +4,8 @@ import burp.gui.MultiplayerRootPanel;
 import burp.gui.ConnectionPanel;
 import burp.gui.MainPanel;
 import java.awt.Component;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import javax.swing.JPanel;
 
@@ -16,6 +18,7 @@ public class BurpExtender implements IBurpExtender, ITab {
     private static final String name = "Multiplayer";
     private static IBurpExtenderCallbacks callbacks;
     private static JPanel rootPanel;
+    private static MainPanel mainPanel;
 
     private static Multiplayer multiplayer;
 
@@ -32,27 +35,48 @@ public class BurpExtender implements IBurpExtender, ITab {
     }
     
     public void main() {
-        BurpExtender.multiplayer = new Multiplayer(callbacks);
+        try {
+            callbacks.printOutput("Main()");
+            BurpExtender.multiplayer = new Multiplayer(this, callbacks);
+            
+            // Root Panel
+            if (BurpExtender.rootPanel == null) {
+                BurpExtender.rootPanel = new MultiplayerRootPanel();    
+            }
+            
+            // ConnectionPanel
+            ConnectionPanel connectionPanel = new ConnectionPanel(multiplayer);
+            BurpExtender.rootPanel.add(connectionPanel);
+            
+            connectionPanel.onConnection(() -> {
+                BurpExtender.rootPanel.remove(connectionPanel);
 
-        // Root Panel
-        BurpExtender.rootPanel = new MultiplayerRootPanel();
+                BurpExtender.mainPanel = new MainPanel(multiplayer, callbacks);
+                BurpExtender.rootPanel.add(mainPanel);
 
-        // ConnectionPanel
-        ConnectionPanel connectionPanel = new ConnectionPanel(BurpExtender.multiplayer);
-        BurpExtender.rootPanel.add(connectionPanel);
-        connectionPanel.onConnection(() -> {
-            BurpExtender.rootPanel.remove(connectionPanel);
+                // HTTP Listener
+                BurpExtender.callbacks.registerHttpListener(multiplayer);
 
-            MainPanel mainPanel = new MainPanel(BurpExtender.multiplayer, BurpExtender.callbacks);
-            BurpExtender.rootPanel.add(mainPanel);
-
-            // HTTP Listener
-            BurpExtender.callbacks.registerHttpListener(multiplayer);
-
+                BurpExtender.rootPanel.repaint();
+                BurpExtender.rootPanel.revalidate();
+            });
+            
             BurpExtender.rootPanel.repaint();
             BurpExtender.rootPanel.revalidate();
-        });
+        } catch (Exception err) {
+            callbacks.printError(String.format("%s", err));
+        }
         
+    }
+    
+    public void disconnect() {
+        try {
+            BurpExtender.rootPanel.remove(mainPanel);
+            BurpExtender.callbacks.removeHttpListener(multiplayer);
+            main();
+        } catch (Exception err) {
+            callbacks.printError(String.format("%s", err));
+        }
     }
 
     @Override

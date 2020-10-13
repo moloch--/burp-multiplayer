@@ -26,11 +26,12 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     private String dbName;  // Database Name aka 'Project Name'
     
     private IBurpExtenderCallbacks callbacks;
+    private BurpExtender extension;
     private IExtensionHelpers helpers;
     private ExecutorService executor = Executors.newFixedThreadPool(4);
 
     private Boolean respectScope = true;
-    private Boolean ignoreTools = true;
+    private Boolean ignoreScanner = true;
     
     private DefaultListModel<String> ignoredExtensions = new DefaultListModel<>();
     private List<String> defaultIgnoredExtensions = new ArrayList<String>(Arrays.asList(
@@ -45,8 +46,9 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     public HTTPHistory history;
 
     // Constructor
-    public Multiplayer(IBurpExtenderCallbacks callbacks) {
+    public Multiplayer(BurpExtender extension, IBurpExtenderCallbacks callbacks) {
         this.history = new HTTPHistory(executor, callbacks);
+        this.extension = extension;
         this.callbacks = callbacks;
         this.helpers = callbacks.getHelpers();
         
@@ -127,6 +129,11 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     
     public Boolean IsConnected() {
         return dbConn != null ? dbConn.isOpen() : false;
+    }
+    
+    public void disconnect() {
+        dbConn.close();
+        extension.disconnect();
     }
     
     public void setRespectScope(Boolean respectScope) {
