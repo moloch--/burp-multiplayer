@@ -39,22 +39,23 @@ public class OptionsPane extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
+        ignoreFileExtensionLabel = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         ignoreFileExtensionList = new javax.swing.JList<>();
         jScrollPane2 = new javax.swing.JScrollPane();
         ignoreStatusCodesList = new javax.swing.JList<>();
-        jLabel2 = new javax.swing.JLabel();
+        ignoreStatusCodesLabel = new javax.swing.JLabel();
         addIgnoreFileExtensionButton = new javax.swing.JButton();
         removeIgnoreFileExtensionButton = new javax.swing.JButton();
         addIgnoreStatusCodeButton = new javax.swing.JButton();
         removeIgnoreStatusCodeButton = new javax.swing.JButton();
-        jLabel3 = new javax.swing.JLabel();
-        jCheckBox1 = new javax.swing.JCheckBox();
+        otherOptionsLabel = new javax.swing.JLabel();
+        ignoreScannerCheckBox = new javax.swing.JCheckBox();
         disconnectButton = new javax.swing.JButton();
+        sendToInProgressCheckBox = new javax.swing.JCheckBox();
 
-        jLabel1.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
-        jLabel1.setText("Ignore File Extensions");
+        ignoreFileExtensionLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
+        ignoreFileExtensionLabel.setText("Ignore File Extensions");
 
         ignoreFileExtensionList.setModel(multiplayer.getIgnoreExtensions()
         );
@@ -64,8 +65,8 @@ public class OptionsPane extends javax.swing.JPanel {
         );
         jScrollPane2.setViewportView(ignoreStatusCodesList);
 
-        jLabel2.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
-        jLabel2.setText("Ignore Status Codes");
+        ignoreStatusCodesLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
+        ignoreStatusCodesLabel.setText("Ignore Status Codes");
 
         addIgnoreFileExtensionButton.setText("Add");
         addIgnoreFileExtensionButton.setToolTipText("");
@@ -96,14 +97,14 @@ public class OptionsPane extends javax.swing.JPanel {
             }
         });
 
-        jLabel3.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
-        jLabel3.setText("Other Options");
+        otherOptionsLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
+        otherOptionsLabel.setText("Other Options");
 
-        jCheckBox1.setSelected(true);
-        jCheckBox1.setText("Ignore Scanner Requests");
-        jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
+        ignoreScannerCheckBox.setSelected(true);
+        ignoreScannerCheckBox.setText("Ignore Scanner Requests");
+        ignoreScannerCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox1ActionPerformed(evt);
+                ignoreScannerCheckBoxActionPerformed(evt);
             }
         });
 
@@ -111,6 +112,15 @@ public class OptionsPane extends javax.swing.JPanel {
         disconnectButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 disconnectButtonActionPerformed(evt);
+            }
+        });
+
+        sendToInProgressCheckBox.setSelected(true);
+        sendToInProgressCheckBox.setText("Send To Implies In Progress");
+        sendToInProgressCheckBox.setToolTipText("");
+        sendToInProgressCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sendToInProgressCheckBoxActionPerformed(evt);
             }
         });
 
@@ -127,9 +137,9 @@ public class OptionsPane extends javax.swing.JPanel {
                             .addComponent(addIgnoreFileExtensionButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(ignoreFileExtensionLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 190, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 353, Short.MAX_VALUE)
                         .addComponent(disconnectButton)
                         .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
@@ -140,11 +150,12 @@ public class OptionsPane extends javax.swing.JPanel {
                                     .addComponent(addIgnoreStatusCodeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(ignoreStatusCodesLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jCheckBox1)
-                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(ignoreScannerCheckBox)
+                                .addComponent(otherOptionsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(sendToInProgressCheckBox)))
                         .addGap(0, 0, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
@@ -152,7 +163,7 @@ public class OptionsPane extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
+                    .addComponent(ignoreFileExtensionLabel)
                     .addComponent(disconnectButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -162,7 +173,7 @@ public class OptionsPane extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(removeIgnoreFileExtensionButton)))
                 .addGap(18, 18, 18)
-                .addComponent(jLabel2)
+                .addComponent(ignoreStatusCodesLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -171,10 +182,12 @@ public class OptionsPane extends javax.swing.JPanel {
                         .addComponent(removeIgnoreStatusCodeButton))
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addComponent(jLabel3)
+                .addComponent(otherOptionsLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jCheckBox1)
-                .addContainerGap(155, Short.MAX_VALUE))
+                .addComponent(ignoreScannerCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(sendToInProgressCheckBox)
+                .addContainerGap(120, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -202,28 +215,33 @@ public class OptionsPane extends javax.swing.JPanel {
         });
     }//GEN-LAST:event_removeIgnoreStatusCodeButtonActionPerformed
 
-    private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jCheckBox1ActionPerformed
+    private void ignoreScannerCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ignoreScannerCheckBoxActionPerformed
+        multiplayer.setIgnoreScanner(ignoreScannerCheckBox.isSelected());
+    }//GEN-LAST:event_ignoreScannerCheckBoxActionPerformed
 
     private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectButtonActionPerformed
         multiplayer.disconnect();
     }//GEN-LAST:event_disconnectButtonActionPerformed
+
+    private void sendToInProgressCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendToInProgressCheckBoxActionPerformed
+        multiplayer.setSendToImpliesInProgress(sendToInProgressCheckBox.isSelected());
+    }//GEN-LAST:event_sendToInProgressCheckBoxActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addIgnoreFileExtensionButton;
     private javax.swing.JButton addIgnoreStatusCodeButton;
     private javax.swing.JButton disconnectButton;
+    private javax.swing.JLabel ignoreFileExtensionLabel;
     private javax.swing.JList<String> ignoreFileExtensionList;
+    private javax.swing.JCheckBox ignoreScannerCheckBox;
+    private javax.swing.JLabel ignoreStatusCodesLabel;
     private javax.swing.JList<String> ignoreStatusCodesList;
-    private javax.swing.JCheckBox jCheckBox1;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel otherOptionsLabel;
     private javax.swing.JButton removeIgnoreFileExtensionButton;
     private javax.swing.JButton removeIgnoreStatusCodeButton;
+    private javax.swing.JCheckBox sendToInProgressCheckBox;
     // End of variables declaration//GEN-END:variables
 }

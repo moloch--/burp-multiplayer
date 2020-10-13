@@ -150,24 +150,20 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
     }
     
     private void applyRowFilter() {
-        callbacks.printOutput(String.format("applyRowFilter %d ...", multiplayer.history.size()));
         if (multiplayer.history.size() < 1) {
-            callbacks.printOutput("applyRowFilter (0)");
             return;
         }        
         sorter.setRowFilter(new RowFilter<TableModel, Integer>() {
             
             public boolean include(Entry<? extends TableModel, ? extends Integer> entry) {
-                callbacks.printOutput("applyRowFilter->include");
                 Integer rowNumber = entry.getIdentifier();
                 TableModel model = entry.getModel();
                 int assessmentColumnIndex = multiplayer.history.columns.indexOf(multiplayer.history.Assessment);
                 String state = (String) model.getValueAt(rowNumber, assessmentColumnIndex);
                 return getEnabledFilters().contains(state);
             }
-            
+
         });
-        callbacks.printOutput("applyRowFilter (done)");
     }
         
     private List<String> getEnabledFilters() {
@@ -209,7 +205,7 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
         bottomTabbedPane.addTab("Response", editor.getResponseEditor().getComponent());
         bottomTabbedPane.setSelectedIndex(selectedTabIndex);
     }
-    
+
     public void updateAvailibleFilters(String reqRespId) {
         String state = multiplayer.history.getById(reqRespId).getAssessment();
         newStateCheckBox.setEnabled(!state.equals(HTTPHistory.New));
@@ -220,17 +216,13 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
     
     @Override
     public void tableChanged(TableModelEvent event) {
-        callbacks.printOutput("Table changed (InScopePanel)");
         updateStateProgress();
     }
     
     public void updateStateProgress() {
-        callbacks.printOutput("Update progress");
         int progress = multiplayer.history.getProgress();
-        callbacks.printOutput(String.format("Update progress = %d", progress));
         stateProgressBar.setValue(progress);
         refresh();
-        callbacks.printOutput("Update progress, done!");
     }
     
     public void initContextMenu() {
@@ -307,6 +299,9 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
                 String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
                 MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
                 Boolean useHttps = "https".equals(reqResp.getProtocol().toLowerCase());
+                if (multiplayer.getSendToImpliesInProgress()) {
+                    impliedInProgress(inScopeTable.getSelectedRow());
+                }
                 callbacks.sendToRepeater(reqResp.getHost(), reqResp.getPort(), useHttps, reqResp.getRequest(), "From Multiplayer");
             }
             
@@ -322,6 +317,9 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
                 String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
                 MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
                 Boolean useHttps = "https".equals(reqResp.getProtocol().toLowerCase());
+                if (multiplayer.getSendToImpliesInProgress()) {
+                    impliedInProgress(inScopeTable.getSelectedRow());
+                }
                 callbacks.sendToIntruder(reqResp.getHost(), reqResp.getPort(), useHttps, reqResp.getRequest());
             }
             
@@ -336,6 +334,9 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
             public void actionPerformed(ActionEvent e) {
                 String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
                 MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
+                if (multiplayer.getSendToImpliesInProgress()) {
+                    impliedInProgress(inScopeTable.getSelectedRow());
+                }
                 callbacks.sendToComparer(reqResp.getRequest());
             }
             
@@ -350,6 +351,9 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
             public void actionPerformed(ActionEvent e) {
                 String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
                 MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
+                if (multiplayer.getSendToImpliesInProgress()) {
+                    impliedInProgress(inScopeTable.getSelectedRow());
+                }
                 callbacks.sendToComparer(reqResp.getResponse());
             }
             
@@ -364,6 +368,9 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
             public void actionPerformed(ActionEvent e) {
                 String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
                 MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
+                if (multiplayer.getSendToImpliesInProgress()) {
+                    impliedInProgress(inScopeTable.getSelectedRow());
+                }
                 callbacks.sendToSpider(reqResp.getURL(callbacks.getHelpers()));
             }
             
@@ -373,6 +380,12 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
         
         return sendToMenu;
     }
+    
+    private void impliedInProgress(int row) {
+        int columnIndex = HTTPHistory.columns.indexOf(HTTPHistory.Assessment);
+        inScopeTable.setValueAt(HTTPHistory.InProgress, row, columnIndex);
+    }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.

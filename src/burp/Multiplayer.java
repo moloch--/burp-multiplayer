@@ -30,8 +30,8 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     private IExtensionHelpers helpers;
     private ExecutorService executor = Executors.newFixedThreadPool(4);
 
-    private Boolean respectScope = true;
     private Boolean ignoreScanner = true;
+    private Boolean sendToImpliesInProgress = true;
     
     private DefaultListModel<String> ignoredExtensions = new DefaultListModel<>();
     private List<String> defaultIgnoredExtensions = new ArrayList<String>(Arrays.asList(
@@ -136,8 +136,16 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         extension.disconnect();
     }
     
-    public void setRespectScope(Boolean respectScope) {
-        this.respectScope = respectScope;
+    public void setIgnoreScanner(Boolean ignoreScanner) {
+        this.ignoreScanner = ignoreScanner;
+    }
+    
+    public void setSendToImpliesInProgress(Boolean theImplication) {
+        sendToImpliesInProgress = theImplication;
+    }
+    
+    public Boolean getSendToImpliesInProgress() {
+        return sendToImpliesInProgress;
     }
     
     // Ignored File Extensions
@@ -192,27 +200,27 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             IResponseInfo respInfo = helpers.analyzeResponse(burpReqResp.getResponse());
             URL url = reqInfo.getUrl();
             
-            // Ignore tools? TODO: Make configurable
-            if (toolFlag == IBurpExtenderCallbacks.TOOL_SCANNER) {
-                callbacks.printOutput(String.format("Ignore: tools (%d)", toolFlag));
+            // Ignore scanner?
+            if (toolFlag == IBurpExtenderCallbacks.TOOL_SCANNER && ignoreScanner) {
+                logInfo(String.format("Ignore: tools (%d)", toolFlag));
                 return;
             }
             
             // Is in-scope?
-            if (respectScope && !callbacks.isInScope(url)) {
-                callbacks.printOutput("Ignore: scope");
+            if (!callbacks.isInScope(url)) {
+                logInfo("Ignore: out of scope");
                 return;
             }
             
             // Is ignored response status?
             if (isIgnoredStatusCode(respInfo.getStatusCode())) {
-                callbacks.printOutput(String.format("Ignore: status code (%d)", respInfo.getStatusCode()));
+                logInfo(String.format("Ignore: status code (%d)", respInfo.getStatusCode()));
                 return;
             }
             
             // Is ignored file extension?
             if (isIgnoredExtension(getFileExtension(url))) {
-                callbacks.printOutput(String.format("Ignore: file ext (%s)", getFileExtension(url)));
+                logInfo(String.format("Ignore: file ext (%s)", getFileExtension(url)));
                 return;
             }
 
