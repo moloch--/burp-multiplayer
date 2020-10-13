@@ -4,9 +4,6 @@ import burp.gui.MultiplayerRootPanel;
 import burp.gui.ConnectionPanel;
 import burp.gui.MainPanel;
 import java.awt.Component;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import javax.swing.JPanel;
 
 /**

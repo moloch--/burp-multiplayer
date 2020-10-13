@@ -67,6 +67,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             this.dbConn = r.connection().hostname(hostname).port(port).connect();
         } catch (ReqlDriverError err) {
             this.logWarn(String.format("Failed to connect to database: %s", err));
+            throw err;
         }
         if (dbConn.isOpen()) {
             logInfo(String.format("Successfully connected: %s", dbConn));
