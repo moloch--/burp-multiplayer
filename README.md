@@ -2,6 +2,8 @@
 
 A Multiplayer Plugin for Burp
 
+![Demo](/.github/demo.gif?raw=true "Demo")
+
 
 ## Setup
 
