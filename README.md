@@ -1,6 +1,6 @@
 # Burp Multiplayer
 
-A Multiplayer Plugin for Burp
+A Multiplayer Plugin for Burp. Sync's in-scope requests/responses, comments, and highlights in realtime.
 
 ![Demo](/.github/demo.gif?raw=true "Demo")
 
