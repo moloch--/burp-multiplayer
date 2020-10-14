@@ -8,6 +8,7 @@ package burp;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -65,11 +66,13 @@ public class HTTPHistory extends AbstractTableModel {
     ));
     
     private final ConcurrentSkipListMap<String, MultiplayerRequestResponse> history;
+    private final MultiplayerLogger logger;
     
-    public HTTPHistory(ExecutorService executor, IBurpExtenderCallbacks callbacks) {
+    public HTTPHistory(ExecutorService executor, MultiplayerLogger logger) {
         history = new ConcurrentSkipListMap();
         this.executor = executor;
-        this.callbacks = callbacks;
+        this.callbacks = logger.callbacks;
+        this.logger = logger;
     }
     
     public void add(MultiplayerRequestResponse reqResp) {
@@ -142,41 +145,7 @@ public class HTTPHistory extends AbstractTableModel {
             iter.next();
         }
         MultiplayerRequestResponse reqResp = history.get(iter.next());
-
-        switch(columns.get(columnIndex)) {
-            case ID:
-                return reqResp.getId();
-            case Method:
-                return reqResp.getMethod();
-            case Protocol:
-                return reqResp.getProtocol();
-            case Host:
-                return reqResp.getHost();
-            case Path:
-                return reqResp.getPath();
-            case Port:
-                return reqResp.getPort();
-            case StatusCode:
-                return reqResp.getStatus();
-            case Comment:
-                return reqResp.getComment();
-            case Highlight:
-                String highlight = reqResp.getHighlight();
-                if (highlight.isBlank() || highlight.isEmpty()) {
-                    return None;
-                }
-                return highlight;
-            case Assessment:
-                String assessment = reqResp.getAssessment();
-                if (assessment.isBlank() || assessment.isEmpty()) {
-                    return New;
-                }
-                return assessment;
-            case DateTime:
-                return reqResp.getDateTime();
-                
-        }
-        return null;
+        return reqResp.getProperty(columns.get(columnIndex));
     }
     
     public Color getColorForId(String id) {
@@ -195,7 +164,7 @@ public class HTTPHistory extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         String id = (String) getValueAt(row, 0);
-        // callbacks.printOutput(String.format("(%d, %d) %s -> %s", row, column, id, value));
+        logger.debug(String.format("(%d, %d) %s -> %s", row, column, id, value));
         String columnName = getColumnName(column);
         if (editableColumns.contains(columnName)) {
             triggerOnEdit(id, columnName, value);
@@ -217,7 +186,7 @@ public class HTTPHistory extends AbstractTableModel {
             return 0; // Avoid divide by zero
         }
         float done = 0;
-        Iterator iter = history.keySet().iterator();
+        Iterator<String> iter = history.keySet().iterator();
         while (iter.hasNext()) {
             if (history.get(iter.next()).getAssessment().equals(Done)) {
                 ++done;
@@ -225,6 +194,16 @@ public class HTTPHistory extends AbstractTableModel {
         }
         float progress = done / (float) history.size();
         return (int) Math.round(progress * 100.0);
+    }
+    
+    public HashMap<String, MultiplayerRequestResponse> snapshot() {
+        HashMap<String, MultiplayerRequestResponse> snapshot = new HashMap();
+        Iterator<String> iter = history.keySet().iterator();
+        while (iter.hasNext()) {
+            MultiplayerRequestResponse reqResp = history.get(iter.next());
+            snapshot.put(reqResp.getId(), reqResp);
+        }
+        return snapshot;
     }
 
 }

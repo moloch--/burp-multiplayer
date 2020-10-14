@@ -7,12 +7,11 @@ package burp.gui;
 
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
+import burp.MultiplayerLogger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 import javax.swing.JOptionPane;
 import com.fasterxml.jackson.databind.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -20,16 +19,22 @@ import java.util.logging.Logger;
  */
 public class OptionsPane extends javax.swing.JPanel {
 
-    private Multiplayer multiplayer;
-    private IBurpExtenderCallbacks callbacks;
+    private final Multiplayer multiplayer;
+    private final IBurpExtenderCallbacks callbacks;
+    private final MultiplayerLogger logger;
     
     /**
      * Creates new form Options
+     * @param multiplayer
+     * @param callbacks
+     * @param logger
      */
-    public OptionsPane(Multiplayer multiplayer, IBurpExtenderCallbacks callbacks) {
-        callbacks.printOutput("Initializing options panel");
+    public OptionsPane(Multiplayer multiplayer, MultiplayerLogger logger) {
+        logger.setLevel(logger.INFO);
+        logger.debug("Initializing options panel");
         this.multiplayer = multiplayer;
-        this.callbacks = callbacks;
+        this.callbacks = logger.callbacks;
+        this.logger = logger;
         initComponents();
         initLoadSettings();
     }
@@ -146,6 +151,8 @@ public class OptionsPane extends javax.swing.JPanel {
         ignoreScannerCheckBox = new javax.swing.JCheckBox();
         disconnectButton = new javax.swing.JButton();
         sendToInProgressCheckBox = new javax.swing.JCheckBox();
+        logLevelComboBox = new javax.swing.JComboBox<>();
+        loggingLabel = new javax.swing.JLabel();
 
         ignoreFileExtensionLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
         ignoreFileExtensionLabel.setText("Ignore File Extensions");
@@ -217,6 +224,19 @@ public class OptionsPane extends javax.swing.JPanel {
             }
         });
 
+        logLevelComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] {
+            logger.DEBUG, logger.INFO, logger.WARN, logger.ERROR
+        }));
+        logLevelComboBox.setSelectedItem(logger.INFO);
+        logLevelComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                logLevelComboBoxActionPerformed(evt);
+            }
+        });
+
+        loggingLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
+        loggingLabel.setText("Log Level");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -248,7 +268,9 @@ public class OptionsPane extends javax.swing.JPanel {
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addComponent(ignoreScannerCheckBox)
                                 .addComponent(otherOptionsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(sendToInProgressCheckBox)))
+                                .addComponent(sendToInProgressCheckBox)
+                                .addComponent(loggingLabel)
+                                .addComponent(logLevelComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
@@ -280,7 +302,11 @@ public class OptionsPane extends javax.swing.JPanel {
                 .addComponent(ignoreScannerCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sendToInProgressCheckBox)
-                .addContainerGap(120, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(loggingLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(logLevelComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(58, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -328,6 +354,11 @@ public class OptionsPane extends javax.swing.JPanel {
         saveExtensionSetting("sendToImpliesInProgress", theImplication);
     }//GEN-LAST:event_sendToInProgressCheckBoxActionPerformed
 
+    private void logLevelComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logLevelComboBoxActionPerformed
+        String level = (String) logLevelComboBox.getSelectedItem();
+        logger.setLevel(level);
+    }//GEN-LAST:event_logLevelComboBoxActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addIgnoreFileExtensionButton;
@@ -340,6 +371,8 @@ public class OptionsPane extends javax.swing.JPanel {
     private javax.swing.JList<String> ignoredStatusCodesJList;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JComboBox<String> logLevelComboBox;
+    private javax.swing.JLabel loggingLabel;
     private javax.swing.JLabel otherOptionsLabel;
     private javax.swing.JButton removeIgnoreFileExtensionButton;
     private javax.swing.JButton removeIgnoreStatusCodeButton;

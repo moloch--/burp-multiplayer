@@ -16,13 +16,15 @@ public class BurpExtender implements IBurpExtender, ITab {
     private static IBurpExtenderCallbacks callbacks;
     private static JPanel rootPanel;
     private static MainPanel mainPanel;
+    private static MultiplayerLogger logger;
 
     private static Multiplayer multiplayer;
 
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
         BurpExtender.callbacks = callbacks;
-        this.logInfo("Multiplayer plugin loading ...");
+        BurpExtender.logger = new MultiplayerLogger(callbacks);
+        logger.info("Multiplayer plugin loading ...");
         BurpExtender.callbacks.setExtensionName(BurpExtender.name);
         
         main();
@@ -34,7 +36,7 @@ public class BurpExtender implements IBurpExtender, ITab {
     public void main() {
         try {
 
-            BurpExtender.multiplayer = new Multiplayer(this, callbacks);
+            BurpExtender.multiplayer = new Multiplayer(this, logger);
             
             // Root Panel
             if (BurpExtender.rootPanel == null) {
@@ -42,13 +44,14 @@ public class BurpExtender implements IBurpExtender, ITab {
             }
             
             // ConnectionPanel
-            ConnectionPanel connectionPanel = new ConnectionPanel(multiplayer, callbacks);
+            ConnectionPanel connectionPanel = new ConnectionPanel(multiplayer, logger);
             BurpExtender.rootPanel.add(connectionPanel);
-            
+
             connectionPanel.onConnection(() -> {
+                logger.debug("onConnection()");
                 BurpExtender.rootPanel.remove(connectionPanel);
 
-                BurpExtender.mainPanel = new MainPanel(multiplayer, callbacks);
+                BurpExtender.mainPanel = new MainPanel(multiplayer, logger);
                 BurpExtender.rootPanel.add(mainPanel);
 
                 // HTTP Listener
@@ -61,7 +64,7 @@ public class BurpExtender implements IBurpExtender, ITab {
             BurpExtender.rootPanel.repaint();
             BurpExtender.rootPanel.revalidate();
         } catch (Exception err) {
-            callbacks.printError(String.format("%s", err));
+            BurpExtender.logger.error("%s", err);
         }
         
     }
@@ -72,7 +75,7 @@ public class BurpExtender implements IBurpExtender, ITab {
             BurpExtender.callbacks.removeHttpListener(multiplayer);
             main();
         } catch (Exception err) {
-            callbacks.printError(String.format("%s", err));
+            BurpExtender.logger.error("%s", err);
         }
     }
 
@@ -84,19 +87,6 @@ public class BurpExtender implements IBurpExtender, ITab {
     @Override
     public Component getUiComponent() {
         return rootPanel;
-    }
-
-    // Loggers
-    public void logInfo(String msg) {
-        BurpExtender.callbacks.printOutput(String.format("[*] %s", msg));
-    }
-
-    public void logWarn(String msg) {
-        BurpExtender.callbacks.printOutput(String.format("[!] %s", msg));
-    }
-
-    public void logError(String msg) {
-        BurpExtender.callbacks.printError(String.format("[ERROR] %s", msg));
     }
 
 }

@@ -50,6 +50,8 @@
                               <Component id="ignoreScannerCheckBox" min="-2" max="-2" attributes="0"/>
                               <Component id="otherOptionsLabel" min="-2" pref="211" max="-2" attributes="0"/>
                               <Component id="sendToInProgressCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="loggingLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="logLevelComboBox" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
@@ -92,7 +94,11 @@
               <Component id="ignoreScannerCheckBox" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="sendToInProgressCheckBox" min="-2" max="-2" attributes="0"/>
-              <EmptySpace pref="120" max="32767" attributes="0"/>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Component id="loggingLabel" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="logLevelComboBox" min="-2" max="-2" attributes="0"/>
+              <EmptySpace pref="58" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -219,6 +225,28 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="sendToInProgressCheckBoxActionPerformed"/>
       </Events>
+    </Component>
+    <Component class="javax.swing.JComboBox" name="logLevelComboBox">
+      <Properties>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="new javax.swing.DefaultComboBoxModel&lt;&gt;(new String[] {&#xa;    logger.DEBUG, logger.INFO, logger.WARN, logger.ERROR&#xa;})" type="code"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="logLevelComboBoxActionPerformed"/>
+      </Events>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="logLevelComboBox.setSelectedItem(logger.INFO);"/>
+        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+      </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="loggingLabel">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name=".SF NS Text" size="13" style="1"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Log Level"/>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

@@ -25,10 +25,10 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     private Connection dbConn = null;
     private String dbName;  // Database Name aka 'Project Name'
     
-    private IBurpExtenderCallbacks callbacks;
-    private BurpExtender extension;
-    private IExtensionHelpers helpers;
-    private ExecutorService executor = Executors.newFixedThreadPool(4);
+    private final IBurpExtenderCallbacks callbacks;
+    private final BurpExtender extension;
+    private final IExtensionHelpers helpers;
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
 
     private Boolean ignoreScanner = true;
     private Boolean sendToImpliesInProgress = true;
@@ -44,12 +44,14 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     ));
 
     public HTTPHistory history;
+    private final MultiplayerLogger logger;
 
     // Constructor
-    public Multiplayer(BurpExtender extension, IBurpExtenderCallbacks callbacks) {
-        this.history = new HTTPHistory(executor, callbacks);
+    public Multiplayer(BurpExtender extension, MultiplayerLogger logger) {
+        this.history = new HTTPHistory(executor, logger);
         this.extension = extension;
-        this.callbacks = callbacks;
+        this.callbacks = logger.callbacks;
+        this.logger = logger;
         this.helpers = callbacks.getHelpers();
         
         defaultIgnoredExtensions.forEach(ext -> {
@@ -62,15 +64,15 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     
     // Database = Project Name
     public Boolean Connect(String hostname, Integer port, String database) {
-        this.logInfo(String.format("Connecting to '%s:%d/%s' ...", hostname, port, database));
+        logger.info("Connecting to '%s:%d/%s' ...", hostname, port, database);
         try {
             this.dbConn = r.connection().hostname(hostname).port(port).connect();
         } catch (ReqlDriverError err) {
-            this.logWarn(String.format("Failed to connect to database: %s", err));
+            logger.warn("Failed to connect to database: %s", err);
             throw err;
         }
         if (dbConn.isOpen()) {
-            logInfo(String.format("Successfully connected: %s", dbConn));
+            logger.debug("Successfully connected: %s", dbConn);
             dbName = database;
             
             Result<Object> result = r.dbList().run(dbConn);
@@ -92,7 +94,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
                     }
                 }
             });
-            callbacks.printOutput("Connected!");
+            logger.debug("Connected!");
             return true;
         } else {
             return false;
@@ -100,7 +102,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     }
 
     private void createDatabase() {
-        logInfo(String.format("Database '%s' does not exist, initializing ...", dbName));
+        logger.info("Database '%s' does not exist, initializing ...", dbName);
         
         // Create Database
         r.dbCreate(dbName).run(dbConn);
@@ -119,13 +121,13 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     }
     
     private void initalizeHistory() {
-        logInfo("Initializing history ...");
+        logger.debug("Initializing history ...");
         Result<MultiplayerRequestResponse> result = http().run(dbConn, MultiplayerRequestResponse.class);
         while (result.hasNext()) {
             MultiplayerRequestResponse entry = result.next();
             history.add(entry);
         }
-        logInfo("History initialized");
+        logger.debug("History initialized");
     }
     
     public Boolean IsConnected() {
@@ -211,25 +213,25 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             
             // Ignore scanner?
             if (toolFlag == IBurpExtenderCallbacks.TOOL_SCANNER && ignoreScanner) {
-                logInfo(String.format("Ignore: tools (%d)", toolFlag));
+                logger.debug("Ignore: tools (%d)", toolFlag);
                 return;
             }
             
             // Is in-scope?
             if (!callbacks.isInScope(url)) {
-                logInfo("Ignore: out of scope");
+                logger.debug("Ignore: out of scope");
                 return;
             }
             
             // Is ignored response status?
             if (isIgnoredStatusCode(respInfo.getStatusCode())) {
-                logInfo(String.format("Ignore: status code (%d)", respInfo.getStatusCode()));
+                logger.debug("Ignore: status code (%d)", respInfo.getStatusCode());
                 return;
             }
             
             // Is ignored file extension?
             if (isIgnoredExtension(getFileExtension(url))) {
-                logInfo(String.format("Ignore: file ext (%s)", getFileExtension(url)));
+                logger.debug("Ignore: file ext (%s)", getFileExtension(url));
                 return;
             }
 
@@ -307,19 +309,6 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             ignoredStatusCodesList.add(iter.next());
         }
         return ignoredStatusCodesList;
-    }
-    
-    // Loggers
-    public void logInfo(String msg) {
-        this.callbacks.printOutput(String.format("[*] %s", msg));
-    }
-    
-    public void logWarn(String msg) {
-        this.callbacks.printOutput(String.format("[!] %s", msg));
-    }
-    
-    public void logError(String msg) {
-        this.callbacks.printError(String.format("[ERROR] %s", msg));
     }
 
 }

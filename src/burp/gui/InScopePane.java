@@ -9,6 +9,7 @@ import burp.HTTPHistory;
 import burp.HTTPMessageEditor;
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
+import burp.MultiplayerLogger;
 import burp.MultiplayerRequestResponse;
 import java.awt.Color;
 import java.awt.Component;
@@ -47,14 +48,16 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
     private IBurpExtenderCallbacks callbacks;
     private ListSelectionListener rowSelectionListener;
     private TableRowSorter<TableModel> sorter;
+    private final MultiplayerLogger logger;
     
     /**
      * Creates new form InScopePane
      */
-    public InScopePane(Multiplayer multiplayer, IBurpExtenderCallbacks callbacks) {
-        callbacks.printOutput("Initializing in-scope panel");
-        this.callbacks = callbacks;
+    public InScopePane(Multiplayer multiplayer, MultiplayerLogger logger) {
+        this.callbacks = logger.callbacks;
+        this.logger = logger;
         this.multiplayer = multiplayer;
+        logger.debug("Initializing in-scope panel");
         initComponents();
         
         // Hide ID column
@@ -102,7 +105,7 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
         initContextMenu();
         refresh();
         
-        callbacks.printOutput("in-scope panel initialized!");
+        logger.debug("in-scope panel initialized!");
     }
 
     private void setMinColumnWidths() {
@@ -169,16 +172,16 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
     private List<String> getEnabledFilters() {
         List<String> enabledFilters = new ArrayList();
         if (newStateCheckBox.isSelected()) {
-            enabledFilters.add(multiplayer.history.New);
+            enabledFilters.add(HTTPHistory.New);
         }
         if (inProgressStateCheckBox.isSelected()) {
-            enabledFilters.add(multiplayer.history.InProgress);
+            enabledFilters.add(HTTPHistory.InProgress);
         }
         if (doneStateCheckBox.isSelected()) {
-            enabledFilters.add(multiplayer.history.Done);
+            enabledFilters.add(HTTPHistory.Done);
         }
         if (blockedStateCheckBox.isSelected()) {
-            enabledFilters.add(multiplayer.history.Blocked);
+            enabledFilters.add(HTTPHistory.Blocked);
         }
         return enabledFilters;
     }
@@ -189,7 +192,6 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
     }
     
     public void displayMessageEditorFor(String reqRespId) {
-        callbacks.printOutput("displayMessageEditorFor");
         MultiplayerRequestResponse reqResp = multiplayer.history.getById(reqRespId);
         
         // Save active tab

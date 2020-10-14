@@ -7,6 +7,9 @@ package burp.gui;
 
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
+import burp.MultiplayerLogger;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 import javax.swing.JOptionPane;
 
@@ -16,15 +19,19 @@ import javax.swing.JOptionPane;
  */
 public class ConnectionPanel extends javax.swing.JPanel {
 
-    private Multiplayer multiplayer;
+    private final Multiplayer multiplayer;
     private List<Runnable> onConnectCallbacks = new ArrayList<Runnable>();
-    private IBurpExtenderCallbacks callbacks;
+    private final IBurpExtenderCallbacks callbacks;
+    private final MultiplayerLogger logger;
     
     /**
      * Creates new form ConnectionPanel
+     * @param multiplayer
+     * @param logger
      */
-    public ConnectionPanel(Multiplayer multiplayer, IBurpExtenderCallbacks callbacks) {
-        this.callbacks = callbacks;
+    public ConnectionPanel(Multiplayer multiplayer, MultiplayerLogger logger) {
+        this.callbacks = logger.callbacks;
+        this.logger = logger;
         this.multiplayer = multiplayer;
         initComponents();
         initLoadSettings();
@@ -213,6 +220,11 @@ public class ConnectionPanel extends javax.swing.JPanel {
                 this.triggerOnConnection();
             }
         } catch (Exception err) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            err.printStackTrace(pw);
+            logger.error(sw.toString());
+            
             JOptionPane.showMessageDialog(this,
                 String.format("Failed to connect.\n%s", err),
                 "Conncection Error",

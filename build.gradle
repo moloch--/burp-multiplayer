@@ -12,8 +12,9 @@ repositories {
 }
 
 dependencies {
-    compile 'net.portswigger.burp.extender:burp-extender-api:2.1'
+    compile group: 'net.portswigger.burp.extender', name: 'burp-extender-api', version: '2.1'
     compile group: 'com.rethinkdb', name: 'rethinkdb-driver', version: '2.4.1'
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
 }
 
 sourceSets {

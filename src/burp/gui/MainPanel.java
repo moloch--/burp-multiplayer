@@ -7,6 +7,7 @@ package burp.gui;
 
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
+import burp.MultiplayerLogger;
 
 /**
  *
@@ -14,22 +15,24 @@ import burp.Multiplayer;
  */
 public class MainPanel extends javax.swing.JPanel {
 
-    private Multiplayer multiplayer;
-    private IBurpExtenderCallbacks callbacks;
+    private final IBurpExtenderCallbacks callbacks;
     
     /**
      * Creates new form MainPanel
+     * @param multiplayer
+     * @param logger
      */
-    public MainPanel(Multiplayer multiplayer, IBurpExtenderCallbacks callbacks) {
-        this.callbacks = callbacks;
+    public MainPanel(Multiplayer multiplayer, MultiplayerLogger logger) {
+        this.callbacks = logger.callbacks;
+        // this.logger = logger;
         initComponents();
-        this.multiplayer = multiplayer;
+        // this.multiplayer = multiplayer;
 
         // Initialize Tabs
-        InScopePane inScopePane = new InScopePane(multiplayer, callbacks);
+        InScopePane inScopePane = new InScopePane(multiplayer, logger);
         this.mainTabbedPane.addTab("In-Scope", inScopePane);
         
-        OptionsPane optionsPane = new OptionsPane(multiplayer, callbacks);
+        OptionsPane optionsPane = new OptionsPane(multiplayer, logger);
         this.mainTabbedPane.addTab("Options", optionsPane);
         callbacks.printOutput("Main panel initialized");
     }

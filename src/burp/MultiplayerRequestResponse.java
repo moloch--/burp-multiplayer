@@ -5,10 +5,23 @@
  */
 package burp;
 
+import static burp.HTTPHistory.Assessment;
+import static burp.HTTPHistory.Comment;
+import static burp.HTTPHistory.DateTime;
+import static burp.HTTPHistory.Highlight;
+import static burp.HTTPHistory.Host;
+import static burp.HTTPHistory.ID;
+import static burp.HTTPHistory.Method;
+import static burp.HTTPHistory.New;
+import static burp.HTTPHistory.None;
+import static burp.HTTPHistory.Path;
+import static burp.HTTPHistory.Port;
+import static burp.HTTPHistory.Protocol;
+import static burp.HTTPHistory.StatusCode;
+import static burp.HTTPHistory.columns;
 import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
@@ -132,7 +145,7 @@ public class MultiplayerRequestResponse implements IHttpRequestResponse, Compara
         this.time = time;
     }
     
-    public long getTime() {
+    public Long getTime() {
         return time;
     }
     
@@ -168,7 +181,7 @@ public class MultiplayerRequestResponse implements IHttpRequestResponse, Compara
         httpService.setPort(port);
     }
 
-    public int getPort() {
+    public Integer getPort() {
         return httpService.getPort();
     }
 
@@ -196,5 +209,43 @@ public class MultiplayerRequestResponse implements IHttpRequestResponse, Compara
     public String toString() {
         return String.format("<id: %s, method: %s, protocol: %s, host: %s, port: %d, path: %s, comment: %s>", 
                 id, method, getProtocol(), getHost(), getPort(), getPath(), comment);
+    }
+    
+    
+    public Object getProperty(String propertyName) {
+        switch(propertyName) {
+            case ID:
+                return this.getId();
+            case Method:
+                return this.getMethod();
+            case Protocol:
+                return this.getProtocol();
+            case Host:
+                return this.getHost();
+            case Path:
+                return this.getPath();
+            case Port:
+                return this.getPort();
+            case StatusCode:
+                return this.getStatus();
+            case Comment:
+                return this.getComment();
+            case Highlight:
+                String highlight = this.getHighlight();
+                if (highlight.isBlank() || highlight.isEmpty()) {
+                    return None;
+                }
+                return highlight;
+            case Assessment:
+                String assessment = this.getAssessment();
+                if (assessment.isBlank() || assessment.isEmpty()) {
+                    return New;
+                }
+                return assessment;
+            case DateTime:
+                return this.getDateTime();
+                
+        }
+        return null;
     }
 }
