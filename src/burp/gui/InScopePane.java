@@ -232,7 +232,7 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
     }
     
     public void initContextMenu() {
-        callbacks.printOutput("initContextMenu");
+        logger.debug("initContextMenu");
         
         final JPopupMenu contextMenu = new JPopupMenu();
         
@@ -292,7 +292,7 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
     }
     
     public JMenu initSendToMenu() {
-        callbacks.printOutput("initSendToMenu");
+        logger.debug("initSendToMenu");
         JMenu sendToMenu = new JMenu("Send To");
         
 
