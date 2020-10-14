@@ -34,40 +34,66 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class MultiplayerExporter {
     
+    private final MultiplayerLogger logger;
     private final Multiplayer multiplayer;
-    private final IBurpExtenderCallbacks callbacks;
     public static final List<String> defaultExportedColumns = new ArrayList<String>(Arrays.asList(
         Method, Protocol, Host, Path, Port, StatusCode, Comment, DateTime
     ));
     
-    public MultiplayerExporter(Multiplayer multiplayer, IBurpExtenderCallbacks callbacks) {
+    public MultiplayerExporter(Multiplayer multiplayer, MultiplayerLogger logger) {
         this.multiplayer = multiplayer;
-        this.callbacks = callbacks;
+        this.logger = logger;
     }
     
-    public Boolean ExportXLSX(String filepath) {
+    public Boolean exportXLSX(String filePath) {
+        return this.exportXLSX(filePath, defaultExportedColumns);
+    }
+    
+    public Boolean exportXLSX(String filePath, List<String> exportColumns) {
         
         Workbook workbook = new XSSFWorkbook();
+        
         Sheet allSheet = workbook.createSheet("All");
-        Integer allRowCursor = 0;
-//        HashMap<String, Sheet> sheetMap = new HashMap();
-//        HashMap<String, Integer> rowCursors = new HashMap();
+        Integer allRowCursor = 1;
+        
+        HashMap<String, Sheet> sheetMap = new HashMap();
+        HashMap<String, Integer> rowCursors = new HashMap();
+        List<String> hostColumns = new ArrayList<>(exportColumns);
+        if (hostColumns.contains(Host)) {
+            hostColumns.remove(Host);
+        }
+        
         HashMap<String, MultiplayerRequestResponse> snapshot = multiplayer.history.snapshot();
         
+        
+        writeHeaders(allSheet, exportColumns);
         for (String key : snapshot.keySet()) {
             MultiplayerRequestResponse reqResp = snapshot.get(key);
             Row allRow = allSheet.createRow(allRowCursor++);
-            writeRow(allRow, defaultExportedColumns, reqResp);   
+            writeRow(allRow, exportColumns, reqResp);
+            
+            if (!sheetMap.containsKey(reqResp.getHost())) {
+                Sheet sheet = workbook.createSheet(reqResp.getHost());
+                writeHeaders(sheet, hostColumns);
+                sheetMap.put(reqResp.getHost(), sheet);
+                rowCursors.put(reqResp.getHost(), 1);
+            }
+            
+            Sheet sheet = sheetMap.get(reqResp.getHost());
+            int rowCursor = rowCursors.get(reqResp.getHost());
+            Row row = sheet.createRow(rowCursor);
+            rowCursors.put(reqResp.getHost(), ++rowCursor);
+            writeRow(row, hostColumns, reqResp);
         }
 
         // Write to disk
-        try (OutputStream fileOut = new FileOutputStream(filepath)) {
+        try (OutputStream fileOut = new FileOutputStream(filePath)) {
             workbook.write(fileOut);
             return true;
         } catch (FileNotFoundException err) {
-            callbacks.printError(err.toString());
+            logger.error(err);
         } catch (IOException err) {
-            callbacks.printError(err.toString());
+            logger.error(err);
         }
         return false;
     }
@@ -79,7 +105,7 @@ public class MultiplayerExporter {
             if (value == null) {
                 return;
             }
-            callbacks.printOutput(String.format("Export: %s", value.getClass().getSimpleName()));
+            logger.debug("Export: %s", value.getClass().getSimpleName());
             switch (value.getClass().getSimpleName()) {
                 case "String":
                     cell.setCellValue((String) value);
@@ -89,5 +115,12 @@ public class MultiplayerExporter {
                     break;
             }
         });
+    }
+    
+    private void writeHeaders(Sheet sheet, List<String> columnNames) {
+        Row row = sheet.createRow(0);
+        for (int index = 0; index < columnNames.size(); ++index) {
+            row.createCell(index).setCellValue(columnNames.get(index));
+        }
     }
 }

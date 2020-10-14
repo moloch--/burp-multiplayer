@@ -34,7 +34,7 @@ public class MainPanel extends javax.swing.JPanel {
         
         OptionsPane optionsPane = new OptionsPane(multiplayer, logger);
         this.mainTabbedPane.addTab("Options", optionsPane);
-        callbacks.printOutput("Main panel initialized");
+        logger.debug("Main panel initialized");
     }
 
     /**

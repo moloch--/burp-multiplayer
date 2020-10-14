@@ -220,11 +220,7 @@ public class ConnectionPanel extends javax.swing.JPanel {
                 this.triggerOnConnection();
             }
         } catch (Exception err) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            err.printStackTrace(pw);
-            logger.error(sw.toString());
-            
+            logger.error(err);
             JOptionPane.showMessageDialog(this,
                 String.format("Failed to connect.\n%s", err),
                 "Conncection Error",

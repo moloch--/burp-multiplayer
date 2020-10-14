@@ -5,6 +5,8 @@
  */
 package burp;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,8 +25,8 @@ public class MultiplayerLogger {
         DEBUG, INFO, WARN, ERROR
     ));
     public final IBurpExtenderCallbacks callbacks;
-    private String currentLevel = DEBUG;
- 
+    private String currentLevel = INFO;
+
     public MultiplayerLogger(IBurpExtenderCallbacks callbacks) {
         this.callbacks = callbacks;
     }
@@ -59,6 +61,13 @@ public class MultiplayerLogger {
 
     public void error(String format, Object ... args) {
         callbacks.printError(String.format(format, args));
+    }
+    
+    public void error(Exception err) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        err.printStackTrace(pw);
+        callbacks.printError(sw.toString());
     }
     
 }

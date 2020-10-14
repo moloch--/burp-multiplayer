@@ -9,6 +9,7 @@ import burp.HTTPHistory;
 import burp.HTTPMessageEditor;
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
+import burp.MultiplayerExporter;
 import burp.MultiplayerLogger;
 import burp.MultiplayerRequestResponse;
 import java.awt.Color;
@@ -17,11 +18,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.RowFilter;
 import javax.swing.RowFilter.Entry;
@@ -421,7 +425,7 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
             }
         };
         bottomTabbedPane = new javax.swing.JTabbedPane();
-        jButton1 = new javax.swing.JButton();
+        exportSpreadsheetButton = new javax.swing.JButton();
         newStateCheckBox = new javax.swing.JCheckBox();
         filtersLabel = new javax.swing.JLabel();
         inProgressStateCheckBox = new javax.swing.JCheckBox();
@@ -445,10 +449,10 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
         parentSplitPane.setTopComponent(inScopeTablePane);
         parentSplitPane.setRightComponent(bottomTabbedPane);
 
-        jButton1.setText("Export Spreadsheet");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        exportSpreadsheetButton.setText("Export Spreadsheet");
+        exportSpreadsheetButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                exportSpreadsheetButtonActionPerformed(evt);
             }
         });
 
@@ -514,7 +518,7 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(stateProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton1)
+                .addComponent(exportSpreadsheetButton)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -522,7 +526,7 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
+                    .addComponent(exportSpreadsheetButton)
                     .addComponent(newStateCheckBox)
                     .addComponent(filtersLabel)
                     .addComponent(inProgressStateCheckBox)
@@ -556,20 +560,32 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
         refresh();
     }//GEN-LAST:event_blockedStateCheckBoxActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void exportSpreadsheetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportSpreadsheetButtonActionPerformed
+        MultiplayerExporter exporter = new MultiplayerExporter(multiplayer, logger);
+        JFrame parentFrame = new JFrame();
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save spreadsheet to ...");
+        int userSelection = fileChooser.showSaveDialog(parentFrame);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            String filePath = fileToSave.getAbsolutePath();
+            if (!filePath.endsWith(".xlsx")) {
+                filePath = String.format("%s.xlsx", filePath);
+            }
+            exporter.exportXLSX(filePath);
+        }
+    }//GEN-LAST:event_exportSpreadsheetButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox blockedStateCheckBox;
     private javax.swing.JTabbedPane bottomTabbedPane;
     private javax.swing.JCheckBox doneStateCheckBox;
+    private javax.swing.JButton exportSpreadsheetButton;
     private javax.swing.JLabel filtersLabel;
     private javax.swing.JCheckBox inProgressStateCheckBox;
     private javax.swing.JTable inScopeTable;
     private javax.swing.JScrollPane inScopeTablePane;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JCheckBox newStateCheckBox;
     private javax.swing.JSplitPane parentSplitPane;
