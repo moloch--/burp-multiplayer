@@ -27,7 +27,11 @@ public class BurpExtender implements IBurpExtender, ITab {
         logger.info("Multiplayer plugin loading ...");
         BurpExtender.callbacks.setExtensionName(BurpExtender.name);
         
-        main();
+        try {
+            main();
+        } catch (Exception err) {
+            logger.error(err);
+        }
 
         // Register us as the main ITab
         BurpExtender.callbacks.addSuiteTab(BurpExtender.this);

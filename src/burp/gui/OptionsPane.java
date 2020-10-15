@@ -28,11 +28,10 @@ public class OptionsPane extends javax.swing.JPanel {
     /**
      * Creates new form Options
      * @param multiplayer
-     * @param callbacks
      * @param logger
      */
     public OptionsPane(Multiplayer multiplayer, MultiplayerLogger logger) {
-        logger.setLevel(logger.INFO);
+        logger.setLevel(MultiplayerLogger.INFO);
         logger.debug("Initializing options panel");
         this.multiplayer = multiplayer;
         this.callbacks = logger.callbacks;
@@ -85,7 +84,7 @@ public class OptionsPane extends javax.swing.JPanel {
             String json = objectMapper.writeValueAsString(ignoredFileExts);
             saveExtensionSetting("ignoredFileExtensions", json);
         } catch (JsonProcessingException err) {
-            callbacks.printError(err.toString());
+            logger.error(err);
         }
     }
     
@@ -98,7 +97,7 @@ public class OptionsPane extends javax.swing.JPanel {
                 multiplayer.clearIgnoredExtensions();
                 ignoredFileExts.forEach(ext -> multiplayer.addIgnoredExtension(ext));
             } catch (JsonProcessingException err) {
-                callbacks.printError(err.toString());
+                logger.error(err);
                 saveExtensionSetting("ignoredFileExtensions", null);
             }
         }
@@ -111,7 +110,7 @@ public class OptionsPane extends javax.swing.JPanel {
             String json = objectMapper.writeValueAsString(ignoredStatusCodes);
             saveExtensionSetting("ignoredStatusCodes", json);
         } catch (JsonProcessingException err) {
-            callbacks.printError(err.toString());
+            logger.error(err);
         }
     }
     
@@ -124,7 +123,7 @@ public class OptionsPane extends javax.swing.JPanel {
                 multiplayer.clearIgnoredStatusCodes();
                 ignoredFileExts.forEach(code -> multiplayer.addIgnoredStatusCodes(code));
             } catch (JsonProcessingException err) {
-                callbacks.printError(err.toString());
+                logger.error(err);
                 saveExtensionSetting("ignoredStatusCodes", null);
             }
         }
