@@ -40,7 +40,7 @@
                               <Component id="loggingLabel" alignment="0" max="32767" attributes="0"/>
                           </Group>
                           <Component id="overwriteDuplicatesCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="includeQueryParametersCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="uniqueQueryParametersCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
@@ -126,7 +126,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="overwriteDuplicatesCheckBox" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="includeQueryParametersCheckBox" min="-2" max="-2" attributes="0"/>
+              <Component id="uniqueQueryParametersCheckBox" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
               <Component id="loggingLabel" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -336,13 +336,16 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Always Overwrite Duplicates"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="overwriteDuplicatesCheckBoxActionPerformed"/>
+      </Events>
     </Component>
-    <Component class="javax.swing.JCheckBox" name="includeQueryParametersCheckBox">
+    <Component class="javax.swing.JCheckBox" name="uniqueQueryParametersCheckBox">
       <Properties>
         <Property name="text" type="java.lang.String" value="Include Query Parameters in Unqiueness"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="includeQueryParametersCheckBoxActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="uniqueQueryParametersCheckBoxActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

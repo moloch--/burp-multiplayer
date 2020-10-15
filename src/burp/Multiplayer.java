@@ -8,6 +8,7 @@ import com.rethinkdb.net.Connection;
 import com.rethinkdb.net.Result;
 
 import java.net.URL;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -34,6 +35,8 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
 
     private Boolean ignoreScanner = true;
     private Boolean sendToImpliesInProgress = true;
+    private Boolean overwriteDuplicates = false;
+    private Boolean uniqueQueryParameters = false;
     
     private DefaultListModel<Pattern> ignoredURLPatterns = new DefaultListModel<>();
     
@@ -126,10 +129,17 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     
     private void initalizeHistory() {
         logger.debug("Initializing history ...");
-        Result<MultiplayerRequestResponse> result = http().run(dbConn, MultiplayerRequestResponse.class);
-        while (result.hasNext()) {
-            MultiplayerRequestResponse entry = result.next();
-            history.add(entry);
+        try {
+            Result<MultiplayerRequestResponse> result = http().run(dbConn, MultiplayerRequestResponse.class);
+            logger.debug("Got history ...");
+            while (result.hasNext()) {
+                MultiplayerRequestResponse entry = result.next();
+                logger.debug("Got entry: %s", entry);
+                history.add(entry);
+            }
+            logger.debug("Results done.");
+        } catch(Exception err) {
+            logger.error(err);
         }
         logger.debug("History initialized");
     }
@@ -216,6 +226,22 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     public DefaultListModel<Pattern> getIgnoredURLPatterns() {        
         return ignoredURLPatterns;
     }
+    
+    public void setOverwriteDuplicates(Boolean overwriteDuplicates) {
+        this.overwriteDuplicates = overwriteDuplicates;
+    }
+    
+    public Boolean getOverwriteDuplicates() {
+        return overwriteDuplicates;
+    }
+    
+    public void setUniqueQueryParameters(Boolean uniqueQueryParameters) {
+        this.uniqueQueryParameters = uniqueQueryParameters;
+    }
+    
+    public Boolean getUniqueQueryParameters() {
+        return uniqueQueryParameters;
+    }
 
     // Burp HTTP Callback
     @Override
@@ -260,8 +286,13 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
                     }
                 }
             }
+            
+            if (!reqRespExists(burpReqResp) || overwriteDuplicates) {
+                http().insert(reqRespToRethink(burpReqResp)).run(dbConn);
+            } else {
+                logger.debug("Ignore: duplicate request (overwrite: %s)", overwriteDuplicates);
+            }
 
-            http().insert(reqRespToRethink(burpReqResp)).run(dbConn);
         }
     }
     
@@ -270,7 +301,8 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     }
     
     public Boolean reqRespExists(IHttpRequestResponse reqResp) {
-        return http().get(getReqRespID(reqResp)).run(dbConn) != null;
+        Result<Object> result = http().get(getReqRespID(reqResp)).run(dbConn);
+        return result.first() != null;
     }
 
     private MapObject reqRespToRethink(IHttpRequestResponse reqResp) {
@@ -293,11 +325,27 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     }
     
     // Creates an ID for a req/resp object (METHOD>PROTOCOL>AUTHORITY>PATH)
+    // optionally include query as unique
     private String getReqRespID(IHttpRequestResponse reqResp) {
         IRequestInfo reqInfo = helpers.analyzeRequest(reqResp);
         URL url = reqInfo.getUrl();
         String urlParts = String.format("%s>%s>%s", url.getProtocol(), url.getAuthority(), url.getPath());
-        return String.format("%s>%s", reqInfo.getMethod(), urlParts);
+        if (uniqueQueryParameters) {
+            urlParts = String.format("%s>%s", urlParts, url.getQuery());
+        }
+        String rawID = String.format("%s>%s", reqInfo.getMethod(), urlParts);
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA1");
+            md.update(rawID.getBytes());
+            StringBuilder builder = new StringBuilder();
+            for (byte data : md.digest()) {
+                builder.append(String.format("%02x", data));
+            }
+            return builder.toString();
+        } catch (Exception err) {
+            logger.error(err);
+        }
+        return "";
     }
     
     // Database Helpers

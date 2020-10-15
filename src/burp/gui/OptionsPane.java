@@ -62,6 +62,28 @@ public class OptionsPane extends javax.swing.JPanel {
             }
         }
         
+        String overwriteDuplicates = loadExtensionSetting("overwriteDuplicates");
+        if (overwriteDuplicates != null) {
+            if ("1".equals(overwriteDuplicates)) {
+                multiplayer.setOverwriteDuplicates(true);
+                overwriteDuplicatesCheckBox.setSelected(true);
+            } else {
+                multiplayer.setOverwriteDuplicates(false);
+                overwriteDuplicatesCheckBox.setSelected(false);
+            }
+        }
+        
+        String uniqueQueryParameters = loadExtensionSetting("uniqueQueryParameters");
+        if (uniqueQueryParameters != null) {
+            if ("1".equals(uniqueQueryParameters)) {
+                multiplayer.setUniqueQueryParameters(true);
+                uniqueQueryParametersCheckBox.setSelected(true);
+            } else {
+                multiplayer.setUniqueQueryParameters(false);
+                uniqueQueryParametersCheckBox.setSelected(false);
+            }
+        }
+        
         loadIgnoredFileExtensionList();
         loadIgnoredStatusCodesList();
         
@@ -72,12 +94,15 @@ public class OptionsPane extends javax.swing.JPanel {
 
     private void saveExtensionSetting(String name, String value) {
         String key = String.format("multiplayer.%s.%s", this.getClass().getName(), name);
+        logger.debug("Save setting %s -> %s", key, value);
         callbacks.saveExtensionSetting(key, value);
     }
     
     private String loadExtensionSetting(String name) {
         String key = String.format("multiplayer.%s.%s", this.getClass().getName(), name);
-        return callbacks.loadExtensionSetting(key);
+        String value = callbacks.loadExtensionSetting(key);
+        logger.debug("Load setting %s <- %s", key, value);
+        return value;
     }
     
     private void saveIgnoredFileExtensionList() {
@@ -164,7 +189,7 @@ public class OptionsPane extends javax.swing.JPanel {
         ignoreURLPatternJList = new javax.swing.JList<>();
         jLabel1 = new javax.swing.JLabel();
         overwriteDuplicatesCheckBox = new javax.swing.JCheckBox();
-        includeQueryParametersCheckBox = new javax.swing.JCheckBox();
+        uniqueQueryParametersCheckBox = new javax.swing.JCheckBox();
 
         ignoreFileExtensionLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
         ignoreFileExtensionLabel.setText("Ignore File Extensions");
@@ -274,11 +299,16 @@ public class OptionsPane extends javax.swing.JPanel {
         jLabel1.setText("Ignore URL Patterns");
 
         overwriteDuplicatesCheckBox.setText("Always Overwrite Duplicates");
-
-        includeQueryParametersCheckBox.setText("Include Query Parameters in Unqiueness");
-        includeQueryParametersCheckBox.addActionListener(new java.awt.event.ActionListener() {
+        overwriteDuplicatesCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                includeQueryParametersCheckBoxActionPerformed(evt);
+                overwriteDuplicatesCheckBoxActionPerformed(evt);
+            }
+        });
+
+        uniqueQueryParametersCheckBox.setText("Include Query Parameters in Unqiueness");
+        uniqueQueryParametersCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                uniqueQueryParametersCheckBoxActionPerformed(evt);
             }
         });
 
@@ -306,7 +336,7 @@ public class OptionsPane extends javax.swing.JPanel {
                                 .addComponent(logLevelComboBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(loggingLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addComponent(overwriteDuplicatesCheckBox)
-                            .addComponent(includeQueryParametersCheckBox)))
+                            .addComponent(uniqueQueryParametersCheckBox)))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(removeIgnoreStatusCodeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -372,7 +402,7 @@ public class OptionsPane extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(overwriteDuplicatesCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(includeQueryParametersCheckBox)
+                .addComponent(uniqueQueryParametersCheckBox)
                 .addGap(11, 11, 11)
                 .addComponent(loggingLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -453,9 +483,17 @@ public class OptionsPane extends javax.swing.JPanel {
         });
     }//GEN-LAST:event_removeIgnoreURLPatternButtonActionPerformed
 
-    private void includeQueryParametersCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_includeQueryParametersCheckBoxActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_includeQueryParametersCheckBoxActionPerformed
+    private void uniqueQueryParametersCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uniqueQueryParametersCheckBoxActionPerformed
+        multiplayer.setUniqueQueryParameters(uniqueQueryParametersCheckBox.isSelected());
+        String uniqueQueryParameters = uniqueQueryParametersCheckBox.isSelected() ? "1" : "0";
+        saveExtensionSetting("uniqueQueryParameters", uniqueQueryParameters);
+    }//GEN-LAST:event_uniqueQueryParametersCheckBoxActionPerformed
+
+    private void overwriteDuplicatesCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_overwriteDuplicatesCheckBoxActionPerformed
+        multiplayer.setOverwriteDuplicates(overwriteDuplicatesCheckBox.isSelected());
+        String overwrite = overwriteDuplicatesCheckBox.isSelected() ? "1" : "0";
+        saveExtensionSetting("overwriteDuplicates", overwrite);
+    }//GEN-LAST:event_overwriteDuplicatesCheckBoxActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -469,7 +507,6 @@ public class OptionsPane extends javax.swing.JPanel {
     private javax.swing.JList<Pattern> ignoreURLPatternJList;
     private javax.swing.JList<String> ignoredFileExtensionJList;
     private javax.swing.JList<String> ignoredStatusCodesJList;
-    private javax.swing.JCheckBox includeQueryParametersCheckBox;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -483,5 +520,6 @@ public class OptionsPane extends javax.swing.JPanel {
     private javax.swing.JButton removeIgnoreStatusCodeButton;
     private javax.swing.JButton removeIgnoreURLPatternButton;
     private javax.swing.JCheckBox sendToInProgressCheckBox;
+    private javax.swing.JCheckBox uniqueQueryParametersCheckBox;
     // End of variables declaration//GEN-END:variables
 }
