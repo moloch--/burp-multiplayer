@@ -12,6 +12,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 import javax.swing.JOptionPane;
 import com.fasterxml.jackson.databind.*;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  *
@@ -153,6 +155,12 @@ public class OptionsPane extends javax.swing.JPanel {
         sendToInProgressCheckBox = new javax.swing.JCheckBox();
         logLevelComboBox = new javax.swing.JComboBox<>();
         loggingLabel = new javax.swing.JLabel();
+        jSeparator1 = new javax.swing.JSeparator();
+        addIgnoreURLPatternButton = new javax.swing.JButton();
+        removeIgnoreURLPatternButton = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        ignoreURLPatternJList = new javax.swing.JList<>();
+        jLabel1 = new javax.swing.JLabel();
 
         ignoreFileExtensionLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
         ignoreFileExtensionLabel.setText("Ignore File Extensions");
@@ -237,6 +245,30 @@ public class OptionsPane extends javax.swing.JPanel {
         loggingLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
         loggingLabel.setText("Log Level");
 
+        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
+
+        addIgnoreURLPatternButton.setText("Add");
+        addIgnoreURLPatternButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addIgnoreURLPatternButtonActionPerformed(evt);
+            }
+        });
+
+        removeIgnoreURLPatternButton.setText("Remove");
+        removeIgnoreURLPatternButton.setToolTipText("");
+        removeIgnoreURLPatternButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeIgnoreURLPatternButtonActionPerformed(evt);
+            }
+        });
+
+        ignoreURLPatternJList.setModel(multiplayer.getIgnoredURLPatterns());
+        ignoreURLPatternJList.setToolTipText("");
+        jScrollPane3.setViewportView(ignoreURLPatternJList);
+
+        jLabel1.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
+        jLabel1.setText("Ignore URL Patterns");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -244,59 +276,79 @@ public class OptionsPane extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(removeIgnoreFileExtensionButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(addIgnoreFileExtensionButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(ignoreFileExtensionLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(ignoreScannerCheckBox)
+                            .addComponent(otherOptionsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(sendToInProgressCheckBox)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(logLevelComboBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(loggingLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(removeIgnoreFileExtensionButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(addIgnoreFileExtensionButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(removeIgnoreStatusCodeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(addIgnoreStatusCodeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(ignoreFileExtensionLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 353, Short.MAX_VALUE)
-                        .addComponent(disconnectButton)
-                        .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(removeIgnoreStatusCodeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(addIgnoreStatusCodeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(ignoreStatusCodesLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(ignoreScannerCheckBox)
-                                .addComponent(otherOptionsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(sendToInProgressCheckBox)
-                                .addComponent(loggingLabel)
-                                .addComponent(logLevelComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(ignoreStatusCodesLabel)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(32, 32, 32)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(removeIgnoreURLPatternButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(addIgnoreURLPatternButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 133, Short.MAX_VALUE)
+                .addComponent(disconnectButton)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(12, 12, 12)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(ignoreFileExtensionLabel)
-                    .addComponent(disconnectButton))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(addIgnoreFileExtensionButton)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(ignoreFileExtensionLabel)
+                            .addComponent(disconnectButton)
+                            .addComponent(jLabel1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(removeIgnoreFileExtensionButton)))
-                .addGap(18, 18, 18)
-                .addComponent(ignoreStatusCodesLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(addIgnoreStatusCodeButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(removeIgnoreStatusCodeButton))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(addIgnoreFileExtensionButton)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(removeIgnoreFileExtensionButton)))
+                                .addGap(18, 18, 18)
+                                .addComponent(ignoreStatusCodesLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(addIgnoreStatusCodeButton)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(removeIgnoreStatusCodeButton))
+                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(addIgnoreURLPatternButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(removeIgnoreURLPatternButton))
+                            .addComponent(jScrollPane3)))
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(otherOptionsLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(ignoreScannerCheckBox)
@@ -306,7 +358,7 @@ public class OptionsPane extends javax.swing.JPanel {
                 .addComponent(loggingLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(logLevelComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(58, Short.MAX_VALUE))
+                .addContainerGap(129, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -324,7 +376,7 @@ public class OptionsPane extends javax.swing.JPanel {
 
     private void removeIgnoreFileExtensionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeIgnoreFileExtensionButtonActionPerformed
         List<String> selectedValues = ignoredFileExtensionJList.getSelectedValuesList();
-        selectedValues.forEach((ext) -> {
+        selectedValues.forEach(ext -> {
             multiplayer.removeIgnoredExtension(ext);
         });
         saveIgnoredFileExtensionList();
@@ -332,7 +384,7 @@ public class OptionsPane extends javax.swing.JPanel {
 
     private void removeIgnoreStatusCodeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeIgnoreStatusCodeButtonActionPerformed
         List<String> selectedValues = ignoredStatusCodesJList.getSelectedValuesList();
-        selectedValues.forEach((code) -> {
+        selectedValues.forEach(code -> {
             multiplayer.removeIgnoredStatusCodes(code);
         });
         saveIgnoredStatusCodesList();
@@ -359,23 +411,51 @@ public class OptionsPane extends javax.swing.JPanel {
         logger.setLevel(level);
     }//GEN-LAST:event_logLevelComboBoxActionPerformed
 
+    private void addIgnoreURLPatternButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addIgnoreURLPatternButtonActionPerformed
+        String rawPattern = JOptionPane.showInputDialog("Add URL pattern:");
+        try {
+            Pattern pattern = Pattern.compile(rawPattern, Pattern.CASE_INSENSITIVE);
+            multiplayer.addIgnoredURLPattern(pattern);
+        } catch (PatternSyntaxException err) {
+            logger.error(err);
+            JOptionPane.showMessageDialog(this, 
+                err.getMessage(),
+                "Pattern Syntax Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
+
+    }//GEN-LAST:event_addIgnoreURLPatternButtonActionPerformed
+
+    private void removeIgnoreURLPatternButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeIgnoreURLPatternButtonActionPerformed
+        List<Pattern> selectedValues = ignoreURLPatternJList.getSelectedValuesList();
+        selectedValues.forEach(pattern -> {
+            multiplayer.removeIgnoredURLPattern(pattern);
+        });
+    }//GEN-LAST:event_removeIgnoreURLPatternButtonActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addIgnoreFileExtensionButton;
     private javax.swing.JButton addIgnoreStatusCodeButton;
+    private javax.swing.JButton addIgnoreURLPatternButton;
     private javax.swing.JButton disconnectButton;
     private javax.swing.JLabel ignoreFileExtensionLabel;
     private javax.swing.JCheckBox ignoreScannerCheckBox;
     private javax.swing.JLabel ignoreStatusCodesLabel;
+    private javax.swing.JList<Pattern> ignoreURLPatternJList;
     private javax.swing.JList<String> ignoredFileExtensionJList;
     private javax.swing.JList<String> ignoredStatusCodesJList;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JComboBox<String> logLevelComboBox;
     private javax.swing.JLabel loggingLabel;
     private javax.swing.JLabel otherOptionsLabel;
     private javax.swing.JButton removeIgnoreFileExtensionButton;
     private javax.swing.JButton removeIgnoreStatusCodeButton;
+    private javax.swing.JButton removeIgnoreURLPatternButton;
     private javax.swing.JCheckBox sendToInProgressCheckBox;
     // End of variables declaration//GEN-END:variables
 }

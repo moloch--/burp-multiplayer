@@ -12,6 +12,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.DefaultListModel;
 
 /**
@@ -33,13 +35,15 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     private Boolean ignoreScanner = true;
     private Boolean sendToImpliesInProgress = true;
     
+    private DefaultListModel<Pattern> ignoredURLPatterns = new DefaultListModel<>();
+    
     private DefaultListModel<String> ignoredExtensions = new DefaultListModel<>();
-    private List<String> defaultIgnoredExtensions = new ArrayList<String>(Arrays.asList(
+    private final List<String> defaultIgnoredExtensions = new ArrayList<>(Arrays.asList(
         "js", "woff", "woff2", "jpg", "jpeg", "png", "gif", "css", "txt"
     ));
     
     private DefaultListModel<String> ignoredStatusCodes = new DefaultListModel<>();
-    private final List<String> defaultIgnoredStatusCodes = new ArrayList<String>(Arrays.asList(
+    private final List<String> defaultIgnoredStatusCodes = new ArrayList<>(Arrays.asList(
         "404"
     ));
 
@@ -202,6 +206,18 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     public void clearIgnoredStatusCodes() {
         ignoredStatusCodes.removeAllElements();
     }
+    
+    public void addIgnoredURLPattern(Pattern pattern) {
+        ignoredURLPatterns.addElement(pattern);
+    }
+    
+    public void removeIgnoredURLPattern(Pattern pattern) {
+        ignoredURLPatterns.removeElement(pattern);
+    }
+
+    public DefaultListModel<Pattern> getIgnoredURLPatterns() {        
+        return ignoredURLPatterns;
+    }
 
     // Burp HTTP Callback
     @Override
@@ -233,6 +249,18 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             if (isIgnoredExtension(getFileExtension(url))) {
                 logger.debug("Ignore: file ext (%s)", getFileExtension(url));
                 return;
+            }
+            
+            // Is ignored URL pattern?
+            if (0 < ignoredURLPatterns.size()) {
+                for (int index = 0; index < ignoredURLPatterns.size(); ++index) {
+                    Pattern pattern = ignoredURLPatterns.getElementAt(index);
+                    Matcher matcher = pattern.matcher(url.toString());
+                    if (matcher.find()) {
+                        logger.debug("Ignore: url pattern '%s'", pattern);
+                        return;
+                    }
+                }
             }
 
             http().insert(reqRespToRethink(burpReqResp)).run(dbConn);
