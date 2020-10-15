@@ -5,6 +5,10 @@
  */
 package burp;
 
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -26,9 +30,13 @@ public class MultiplayerLogger {
     ));
     public final IBurpExtenderCallbacks callbacks;
     private String currentLevel = INFO;
+    private FileWriter logFile;
 
     public MultiplayerLogger(IBurpExtenderCallbacks callbacks) {
         this.callbacks = callbacks;
+        try {
+            logFile = new FileWriter("/tmp/burp-multiplayer.log");
+        } catch(IOException ex) {}
     }
     
     public void setLevel(String level) {
@@ -49,22 +57,42 @@ public class MultiplayerLogger {
         if (currentLevelIndex() <= levels.indexOf(DEBUG)) {
             callbacks.printOutput(String.format(format, args));
         }
+        try {
+            logFile.write(String.format(format, args));
+            logFile.write("\n");
+            logFile.flush();
+        } catch (IOException ex) {}
     }
     
     public void info(String format, Object ... args) {
         if (currentLevelIndex() <= levels.indexOf(INFO)) {
             callbacks.printOutput(String.format(format, args));
         }
+        try {
+            logFile.write(String.format(format, args));
+            logFile.write("\n");
+            logFile.flush();
+        } catch (IOException ex) {}
     }
     
     public void warn(String format, Object ... args) {
         if (currentLevelIndex() <= levels.indexOf(WARN) ) {
             callbacks.printOutput(String.format(format, args));
         }
+        try {
+            logFile.write(String.format(format, args));
+            logFile.write("\n");
+            logFile.flush();
+        } catch (IOException ex) {}
     }
 
     public void error(String format, Object ... args) {
         callbacks.printError(String.format(format, args));
+        try {
+            logFile.write(String.format(format, args));
+            logFile.write("\n");
+            logFile.flush();
+        } catch (IOException ex) {}
     }
     
     public void error(Exception err) {
@@ -72,6 +100,11 @@ public class MultiplayerLogger {
         PrintWriter pw = new PrintWriter(sw);
         err.printStackTrace(pw);
         callbacks.printError(sw.toString());
+        try {
+            logFile.write(sw.toString());
+            logFile.write("\n");
+            logFile.flush();
+        } catch (IOException ex) {}
     }
     
 }

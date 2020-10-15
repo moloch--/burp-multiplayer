@@ -8,8 +8,6 @@ package burp.gui;
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
 import burp.MultiplayerLogger;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.*;
 import javax.swing.JOptionPane;
 
@@ -17,10 +15,10 @@ import javax.swing.JOptionPane;
  *
  * @author moloch
  */
-public class ConnectionPanel extends javax.swing.JPanel {
+public final class ConnectionPanel extends javax.swing.JPanel {
 
     private final Multiplayer multiplayer;
-    private List<Runnable> onConnectCallbacks = new ArrayList<Runnable>();
+    private List<Runnable> onConnectCallbacks = new ArrayList<>();
     private final IBurpExtenderCallbacks callbacks;
     private final MultiplayerLogger logger;
     

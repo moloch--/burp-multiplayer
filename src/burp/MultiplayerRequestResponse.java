@@ -18,7 +18,6 @@ import static burp.HTTPHistory.Path;
 import static burp.HTTPHistory.Port;
 import static burp.HTTPHistory.Protocol;
 import static burp.HTTPHistory.StatusCode;
-import static burp.HTTPHistory.columns;
 import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -231,17 +230,17 @@ public class MultiplayerRequestResponse implements IHttpRequestResponse, Compara
             case Comment:
                 return this.getComment();
             case Highlight:
-                String highlight = this.getHighlight();
-                if (highlight.isBlank() || highlight.isEmpty()) {
+                String highlightState = this.getHighlight();
+                if (highlightState.isBlank() || highlightState.isEmpty()) {
                     return None;
                 }
-                return highlight;
+                return highlightState;
             case Assessment:
-                String assessment = this.getAssessment();
-                if (assessment.isBlank() || assessment.isEmpty()) {
+                String assessmentState = this.getAssessment();
+                if (assessmentState.isBlank() || assessmentState.isEmpty()) {
                     return New;
                 }
-                return assessment;
+                return assessmentState;
             case DateTime:
                 return this.getDateTime();
                 
