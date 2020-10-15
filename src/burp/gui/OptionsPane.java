@@ -31,7 +31,6 @@ public class OptionsPane extends javax.swing.JPanel {
      * @param logger
      */
     public OptionsPane(Multiplayer multiplayer, MultiplayerLogger logger) {
-        logger.setLevel(MultiplayerLogger.INFO);
         logger.debug("Initializing options panel");
         this.multiplayer = multiplayer;
         this.callbacks = logger.callbacks;
@@ -65,6 +64,10 @@ public class OptionsPane extends javax.swing.JPanel {
         
         loadIgnoredFileExtensionList();
         loadIgnoredStatusCodesList();
+        
+        String level = logger.getLevel();
+        logger.debug("Init log level '%s'", level);
+        logLevelComboBox.setSelectedItem(level);
     }
 
     private void saveExtensionSetting(String name, String value) {
@@ -160,6 +163,8 @@ public class OptionsPane extends javax.swing.JPanel {
         jScrollPane3 = new javax.swing.JScrollPane();
         ignoreURLPatternJList = new javax.swing.JList<>();
         jLabel1 = new javax.swing.JLabel();
+        overwriteDuplicatesCheckBox = new javax.swing.JCheckBox();
+        includeQueryParametersCheckBox = new javax.swing.JCheckBox();
 
         ignoreFileExtensionLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
         ignoreFileExtensionLabel.setText("Ignore File Extensions");
@@ -268,6 +273,15 @@ public class OptionsPane extends javax.swing.JPanel {
         jLabel1.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
         jLabel1.setText("Ignore URL Patterns");
 
+        overwriteDuplicatesCheckBox.setText("Always Overwrite Duplicates");
+
+        includeQueryParametersCheckBox.setText("Include Query Parameters in Unqiueness");
+        includeQueryParametersCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                includeQueryParametersCheckBoxActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -290,7 +304,9 @@ public class OptionsPane extends javax.swing.JPanel {
                             .addComponent(sendToInProgressCheckBox)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                 .addComponent(logLevelComboBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(loggingLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addComponent(loggingLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(overwriteDuplicatesCheckBox)
+                            .addComponent(includeQueryParametersCheckBox)))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(removeIgnoreStatusCodeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -309,7 +325,7 @@ public class OptionsPane extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 133, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 228, Short.MAX_VALUE)
                 .addComponent(disconnectButton)
                 .addContainerGap())
         );
@@ -353,11 +369,15 @@ public class OptionsPane extends javax.swing.JPanel {
                 .addComponent(ignoreScannerCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sendToInProgressCheckBox)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(overwriteDuplicatesCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(includeQueryParametersCheckBox)
+                .addGap(11, 11, 11)
                 .addComponent(loggingLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(logLevelComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(129, Short.MAX_VALUE))
+                .addContainerGap(119, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -408,6 +428,7 @@ public class OptionsPane extends javax.swing.JPanel {
     private void logLevelComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logLevelComboBoxActionPerformed
         String level = (String) logLevelComboBox.getSelectedItem();
         logger.setLevel(level);
+        callbacks.saveExtensionSetting("multiplayer.logLevel", level);
     }//GEN-LAST:event_logLevelComboBoxActionPerformed
 
     private void addIgnoreURLPatternButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addIgnoreURLPatternButtonActionPerformed
@@ -432,6 +453,10 @@ public class OptionsPane extends javax.swing.JPanel {
         });
     }//GEN-LAST:event_removeIgnoreURLPatternButtonActionPerformed
 
+    private void includeQueryParametersCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_includeQueryParametersCheckBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_includeQueryParametersCheckBoxActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addIgnoreFileExtensionButton;
@@ -444,6 +469,7 @@ public class OptionsPane extends javax.swing.JPanel {
     private javax.swing.JList<Pattern> ignoreURLPatternJList;
     private javax.swing.JList<String> ignoredFileExtensionJList;
     private javax.swing.JList<String> ignoredStatusCodesJList;
+    private javax.swing.JCheckBox includeQueryParametersCheckBox;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -452,6 +478,7 @@ public class OptionsPane extends javax.swing.JPanel {
     private javax.swing.JComboBox<String> logLevelComboBox;
     private javax.swing.JLabel loggingLabel;
     private javax.swing.JLabel otherOptionsLabel;
+    private javax.swing.JCheckBox overwriteDuplicatesCheckBox;
     private javax.swing.JButton removeIgnoreFileExtensionButton;
     private javax.swing.JButton removeIgnoreStatusCodeButton;
     private javax.swing.JButton removeIgnoreURLPatternButton;

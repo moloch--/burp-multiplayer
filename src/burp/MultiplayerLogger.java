@@ -37,6 +37,10 @@ public class MultiplayerLogger {
         }
     }
     
+    public String getLevel() {
+        return currentLevel;
+    }
+    
     private int currentLevelIndex() {
         return levels.indexOf(currentLevel);
     }

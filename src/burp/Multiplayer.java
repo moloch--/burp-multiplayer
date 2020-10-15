@@ -193,9 +193,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
                 return;
             }
             ignoredStatusCodes.addElement(statusCode);
-        } catch (NumberFormatException e) {
-            return;
-        }
+        } catch (NumberFormatException e) { }
     }
     
     public void removeIgnoredStatusCodes(String statusCode) {

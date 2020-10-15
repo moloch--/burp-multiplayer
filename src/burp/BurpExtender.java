@@ -24,6 +24,11 @@ public class BurpExtender implements IBurpExtender, ITab {
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
         BurpExtender.callbacks = callbacks;
         BurpExtender.logger = new MultiplayerLogger(callbacks);
+        String logLevel = callbacks.loadExtensionSetting("multiplayer.logLevel");
+        if (logLevel != null) {
+            BurpExtender.logger.info("Log Level -> %s", logLevel);
+            BurpExtender.logger.setLevel(logLevel);
+        }
         logger.info("Multiplayer plugin loading ...");
         BurpExtender.callbacks.setExtensionName(BurpExtender.name);
         
