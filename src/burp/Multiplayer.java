@@ -253,25 +253,25 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             
             // Ignore scanner?
             if (toolFlag == IBurpExtenderCallbacks.TOOL_SCANNER && ignoreScanner) {
-                logger.debug("Ignore: tools (%d)", toolFlag);
+                logger.debug("Ignore: tools (%d) '%s'", toolFlag, url);
                 return;
             }
             
             // Is in-scope?
             if (!callbacks.isInScope(url)) {
-                logger.debug("Ignore: out of scope");
+                logger.debug("Ignore: out of scope '%s'", url);
                 return;
             }
             
             // Is ignored response status?
             if (isIgnoredStatusCode(respInfo.getStatusCode())) {
-                logger.debug("Ignore: status code (%d)", respInfo.getStatusCode());
+                logger.debug("Ignore: status code (%d) '%s'", respInfo.getStatusCode(), url);
                 return;
             }
             
             // Is ignored file extension?
             if (isIgnoredExtension(getFileExtension(url))) {
-                logger.debug("Ignore: file ext (%s)", getFileExtension(url));
+                logger.debug("Ignore: file ext (%s) '%s'", getFileExtension(url), url);
                 return;
             }
             
@@ -281,16 +281,16 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
                     Pattern pattern = ignoredURLPatterns.getElementAt(index);
                     Matcher matcher = pattern.matcher(url.toString());
                     if (matcher.find()) {
-                        logger.debug("Ignore: url pattern '%s'", pattern);
+                        logger.debug("Ignore: url pattern %s '%s'", pattern, url);
                         return;
                     }
                 }
             }
             
-            if (!reqRespExists(burpReqResp) || overwriteDuplicates) {
+            if (!isDuplicate(burpReqResp) || overwriteDuplicates) {
                 http().insert(reqRespToRethink(burpReqResp)).run(dbConn);
             } else {
-                logger.debug("Ignore: duplicate request (overwrite: %s)", overwriteDuplicates);
+                logger.debug("Ignore: duplicate request '%s'", url);
             }
 
         }
@@ -300,7 +300,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         http().get(reqRespId).delete().run(dbConn);
     }
     
-    public Boolean reqRespExists(IHttpRequestResponse reqResp) {
+    public Boolean isDuplicate(IHttpRequestResponse reqResp) {
         Result<Object> result = http().get(getReqRespID(reqResp)).run(dbConn);
         return result.first() != null;
     }
