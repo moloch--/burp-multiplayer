@@ -25,6 +25,9 @@ public class OptionsPane extends javax.swing.JPanel {
     private final IBurpExtenderCallbacks callbacks;
     private final MultiplayerLogger logger;
     
+    private static final String TRUE = "1"; // String booleans
+    private static final String FALSE = "0";
+    
     /**
      * Creates new form Options
      * @param multiplayer
@@ -42,7 +45,7 @@ public class OptionsPane extends javax.swing.JPanel {
     private void initLoadSettings() {
         String theImplication = loadExtensionSetting("sendToImpliesInProgress");
         if (theImplication != null) {
-            if ("1".equals(theImplication)) {
+            if (TRUE.equals(theImplication)) {
                 multiplayer.setSendToImpliesInProgress(true);
                 sendToInProgressCheckBox.setSelected(true);
             } else {
@@ -51,20 +54,9 @@ public class OptionsPane extends javax.swing.JPanel {
             }
         }
         
-        String ignoreScanner = loadExtensionSetting("ignoreScanner");
-        if (ignoreScanner != null) {
-            if ("1".equals(ignoreScanner)) {
-                multiplayer.setIgnoreScanner(true);
-                ignoreScannerCheckBox.setSelected(true);
-            } else {
-                multiplayer.setIgnoreScanner(false);
-                ignoreScannerCheckBox.setSelected(false);
-            }
-        }
-        
         String overwriteDuplicates = loadExtensionSetting("overwriteDuplicates");
         if (overwriteDuplicates != null) {
-            if ("1".equals(overwriteDuplicates)) {
+            if (TRUE.equals(overwriteDuplicates)) {
                 multiplayer.setOverwriteDuplicates(true);
                 overwriteDuplicatesCheckBox.setSelected(true);
             } else {
@@ -75,7 +67,7 @@ public class OptionsPane extends javax.swing.JPanel {
         
         String uniqueQueryParameters = loadExtensionSetting("uniqueQueryParameters");
         if (uniqueQueryParameters != null) {
-            if ("1".equals(uniqueQueryParameters)) {
+            if (TRUE.equals(uniqueQueryParameters)) {
                 multiplayer.setUniqueQueryParameters(true);
                 uniqueQueryParametersCheckBox.setSelected(true);
             } else {
@@ -86,6 +78,8 @@ public class OptionsPane extends javax.swing.JPanel {
         
         loadIgnoredFileExtensionList();
         loadIgnoredStatusCodesList();
+        loadIgnoredURLPatternsList();
+        loadIgnoredToolsList();
         
         String level = logger.getLevel();
         logger.debug("Init log level '%s'", level);
@@ -157,6 +151,97 @@ public class OptionsPane extends javax.swing.JPanel {
         }
     }
     
+    private void saveIgnoredURLPatternsList() {
+        List<String> ignoredPatterns = multiplayer.getIgnoredURLPatternsList();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String json = objectMapper.writeValueAsString(ignoredPatterns);
+            saveExtensionSetting("ignoredURLPatterns", json);
+        } catch (JsonProcessingException err) {
+            logger.error(err);
+        }
+    }
+    
+    private void loadIgnoredURLPatternsList() {
+        String json = loadExtensionSetting("ignoredURLPatterns");
+        if (json != null && !json.isBlank() && !json.isEmpty()) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                List<String> ignoredURLPatterns = objectMapper.readValue(json, List.class);
+                multiplayer.clearIgnoredURLPatterns();
+                ignoredURLPatterns.forEach(rawPattern -> {
+                    Pattern pattern = Pattern.compile(rawPattern, Pattern.CASE_INSENSITIVE);
+                    multiplayer.addIgnoredURLPattern(pattern);
+                });
+            } catch (JsonProcessingException err) {
+                logger.error(err);
+            }
+        }
+    }
+    
+    private void saveIgnoredToolsList() {
+        List<Integer> ignoredTools = multiplayer.getIgnoredToolsList();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String json = objectMapper.writeValueAsString(ignoredTools);
+            saveExtensionSetting("ignoredTools", json);
+        } catch (JsonProcessingException err) {
+            logger.error(err);
+        }
+    }
+    
+    private void loadIgnoredToolsList() {
+        String json = loadExtensionSetting("ignoredTools");
+        if (json != null && !json.isBlank() && !json.isEmpty()) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                List<Integer> ignoredTools = objectMapper.readValue(json, List.class);
+                
+                multiplayer.clearIgnoredTools();
+                ignoreScannerCheckBox.setSelected(false);
+                ignoreSpiderCheckBox.setSelected(false);
+                ignoreIntruderCheckBox.setSelected(false);
+                ignoreRepeaterCheckBox.setSelected(false);
+                ignoreDecoderCheckBox.setSelected(false);
+                ignoreComparerCheckBox.setSelected(false);
+                ignoreExtenderCheckBox.setSelected(false);
+                ignoreSequencerCheckBox.setSelected(false);
+                
+                ignoredTools.forEach(toolFlag -> {
+                    multiplayer.addIgnoredTool(toolFlag);
+                    switch(toolFlag) {
+                        case IBurpExtenderCallbacks.TOOL_SCANNER:
+                            ignoreScannerCheckBox.setSelected(true);
+                            break;
+                        case IBurpExtenderCallbacks.TOOL_SPIDER:
+                            ignoreSpiderCheckBox.setSelected(true);
+                            break;
+                        case IBurpExtenderCallbacks.TOOL_INTRUDER:
+                            ignoreIntruderCheckBox.setSelected(true);
+                            break;
+                        case IBurpExtenderCallbacks.TOOL_REPEATER:
+                            ignoreRepeaterCheckBox.setSelected(true);
+                            break;
+                        case IBurpExtenderCallbacks.TOOL_EXTENDER:
+                            ignoreExtenderCheckBox.setSelected(true);
+                            break;
+                        case IBurpExtenderCallbacks.TOOL_SEQUENCER:
+                            ignoreSequencerCheckBox.setSelected(true);
+                            break;
+                        case IBurpExtenderCallbacks.TOOL_DECODER:
+                            ignoreDecoderCheckBox.setSelected(true);
+                        case IBurpExtenderCallbacks.TOOL_COMPARER:
+                            ignoreComparerCheckBox.setSelected(true);
+                    }
+                });
+                saveIgnoredToolsList();
+            } catch (JsonProcessingException err) {
+                logger.error(err);
+            }
+        }
+    }
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -190,6 +275,14 @@ public class OptionsPane extends javax.swing.JPanel {
         jLabel1 = new javax.swing.JLabel();
         overwriteDuplicatesCheckBox = new javax.swing.JCheckBox();
         uniqueQueryParametersCheckBox = new javax.swing.JCheckBox();
+        jLabel2 = new javax.swing.JLabel();
+        ignoreSpiderCheckBox = new javax.swing.JCheckBox();
+        ignoreIntruderCheckBox = new javax.swing.JCheckBox();
+        ignoreRepeaterCheckBox = new javax.swing.JCheckBox();
+        ignoreSequencerCheckBox = new javax.swing.JCheckBox();
+        ignoreDecoderCheckBox = new javax.swing.JCheckBox();
+        ignoreComparerCheckBox = new javax.swing.JCheckBox();
+        ignoreExtenderCheckBox = new javax.swing.JCheckBox();
 
         ignoreFileExtensionLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
         ignoreFileExtensionLabel.setText("Ignore File Extensions");
@@ -238,7 +331,7 @@ public class OptionsPane extends javax.swing.JPanel {
         otherOptionsLabel.setText("Other Options");
 
         ignoreScannerCheckBox.setSelected(true);
-        ignoreScannerCheckBox.setText("Ignore Scanner Requests");
+        ignoreScannerCheckBox.setText("Scanner");
         ignoreScannerCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ignoreScannerCheckBoxActionPerformed(evt);
@@ -298,7 +391,7 @@ public class OptionsPane extends javax.swing.JPanel {
         jLabel1.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
         jLabel1.setText("Ignore URL Patterns");
 
-        overwriteDuplicatesCheckBox.setText("Always Overwrite Duplicates");
+        overwriteDuplicatesCheckBox.setText("Overwrite Duplicates");
         overwriteDuplicatesCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 overwriteDuplicatesCheckBoxActionPerformed(evt);
@@ -312,6 +405,65 @@ public class OptionsPane extends javax.swing.JPanel {
             }
         });
 
+        jLabel2.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
+        jLabel2.setText("Ignore Tools");
+
+        ignoreSpiderCheckBox.setText("Spider");
+        ignoreSpiderCheckBox.setToolTipText("");
+        ignoreSpiderCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ignoreSpiderCheckBoxActionPerformed(evt);
+            }
+        });
+
+        ignoreIntruderCheckBox.setSelected(true);
+        ignoreIntruderCheckBox.setText("Intruder");
+        ignoreIntruderCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ignoreIntruderCheckBoxActionPerformed(evt);
+            }
+        });
+
+        ignoreRepeaterCheckBox.setSelected(true);
+        ignoreRepeaterCheckBox.setText("Repeater");
+        ignoreRepeaterCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ignoreRepeaterCheckBoxActionPerformed(evt);
+            }
+        });
+
+        ignoreSequencerCheckBox.setSelected(true);
+        ignoreSequencerCheckBox.setText("Sequencer");
+        ignoreSequencerCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ignoreSequencerCheckBoxActionPerformed(evt);
+            }
+        });
+
+        ignoreDecoderCheckBox.setSelected(true);
+        ignoreDecoderCheckBox.setText("Decoder");
+        ignoreDecoderCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ignoreDecoderCheckBoxActionPerformed(evt);
+            }
+        });
+
+        ignoreComparerCheckBox.setSelected(true);
+        ignoreComparerCheckBox.setText("Comparer");
+        ignoreComparerCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ignoreComparerCheckBoxActionPerformed(evt);
+            }
+        });
+
+        ignoreExtenderCheckBox.setSelected(true);
+        ignoreExtenderCheckBox.setText("Extender");
+        ignoreExtenderCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ignoreExtenderCheckBoxActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -319,6 +471,23 @@ public class OptionsPane extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(removeIgnoreStatusCodeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(addIgnoreStatusCodeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(ignoreStatusCodesLabel)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(32, 32, 32)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(removeIgnoreURLPatternButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(addIgnoreURLPatternButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(uniqueQueryParametersCheckBox)
+                    .addComponent(sendToInProgressCheckBox)
+                    .addComponent(overwriteDuplicatesCheckBox)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -328,35 +497,37 @@ public class OptionsPane extends javax.swing.JPanel {
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                 .addComponent(ignoreFileExtensionLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(ignoreScannerCheckBox)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                             .addComponent(otherOptionsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(sendToInProgressCheckBox)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(logLevelComboBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(loggingLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(overwriteDuplicatesCheckBox)
-                            .addComponent(uniqueQueryParametersCheckBox)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(removeIgnoreStatusCodeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(addIgnoreStatusCodeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(ignoreStatusCodesLabel)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(32, 32, 32)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(removeIgnoreURLPatternButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(addIgnoreURLPatternButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGap(65, 65, 65)))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(loggingLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
+                        .addComponent(logLevelComboBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 228, Short.MAX_VALUE)
-                .addComponent(disconnectButton)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 266, Short.MAX_VALUE)
+                        .addComponent(disconnectButton))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(ignoreRepeaterCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(ignoreScannerCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(ignoreIntruderCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(ignoreSpiderCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(ignoreSequencerCheckBox)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addComponent(ignoreDecoderCheckBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(ignoreComparerCheckBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(ignoreExtenderCheckBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -393,21 +564,39 @@ public class OptionsPane extends javax.swing.JPanel {
                                 .addComponent(removeIgnoreURLPatternButton))
                             .addComponent(jScrollPane3)))
                     .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(otherOptionsLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ignoreScannerCheckBox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sendToInProgressCheckBox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(overwriteDuplicatesCheckBox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(uniqueQueryParametersCheckBox)
-                .addGap(11, 11, 11)
-                .addComponent(loggingLabel)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(ignoreSpiderCheckBox)
+                            .addComponent(ignoreDecoderCheckBox))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(ignoreScannerCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(ignoreComparerCheckBox))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(ignoreIntruderCheckBox)
+                            .addComponent(ignoreExtenderCheckBox))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(ignoreRepeaterCheckBox)
+                            .addComponent(ignoreSequencerCheckBox)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(otherOptionsLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sendToInProgressCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(overwriteDuplicatesCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(uniqueQueryParametersCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(loggingLabel)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(logLevelComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(119, Short.MAX_VALUE))
+                .addContainerGap(254, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -440,9 +629,12 @@ public class OptionsPane extends javax.swing.JPanel {
     }//GEN-LAST:event_removeIgnoreStatusCodeButtonActionPerformed
 
     private void ignoreScannerCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ignoreScannerCheckBoxActionPerformed
-        multiplayer.setIgnoreScanner(ignoreScannerCheckBox.isSelected());
-        String ignoreScanner = ignoreScannerCheckBox.isSelected() ? "1" : "0";
-        saveExtensionSetting("ignoreScanner", ignoreScanner);
+        if (ignoreScannerCheckBox.isSelected()) {
+            multiplayer.addIgnoredTool(IBurpExtenderCallbacks.TOOL_SCANNER);   
+        } else {
+            multiplayer.removeIgnoredTool(IBurpExtenderCallbacks.TOOL_SCANNER);
+        }
+        saveIgnoredToolsList();
     }//GEN-LAST:event_ignoreScannerCheckBoxActionPerformed
 
     private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectButtonActionPerformed
@@ -451,7 +643,7 @@ public class OptionsPane extends javax.swing.JPanel {
 
     private void sendToInProgressCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendToInProgressCheckBoxActionPerformed
         multiplayer.setSendToImpliesInProgress(sendToInProgressCheckBox.isSelected());
-        String theImplication = sendToInProgressCheckBox.isSelected() ? "1" : "0";
+        String theImplication = sendToInProgressCheckBox.isSelected() ? TRUE : FALSE;
         saveExtensionSetting("sendToImpliesInProgress", theImplication);
     }//GEN-LAST:event_sendToInProgressCheckBoxActionPerformed
 
@@ -466,14 +658,13 @@ public class OptionsPane extends javax.swing.JPanel {
         try {
             Pattern pattern = Pattern.compile(rawPattern, Pattern.CASE_INSENSITIVE);
             multiplayer.addIgnoredURLPattern(pattern);
+            saveIgnoredURLPatternsList();
         } catch (PatternSyntaxException err) {
-            logger.error(err);
             JOptionPane.showMessageDialog(this, 
                 err.getMessage(),
                 "Pattern Syntax Error",
                 JOptionPane.ERROR_MESSAGE);
         }
-
     }//GEN-LAST:event_addIgnoreURLPatternButtonActionPerformed
 
     private void removeIgnoreURLPatternButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeIgnoreURLPatternButtonActionPerformed
@@ -481,19 +672,83 @@ public class OptionsPane extends javax.swing.JPanel {
         selectedValues.forEach(pattern -> {
             multiplayer.removeIgnoredURLPattern(pattern);
         });
+        saveIgnoredURLPatternsList();
     }//GEN-LAST:event_removeIgnoreURLPatternButtonActionPerformed
 
     private void uniqueQueryParametersCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uniqueQueryParametersCheckBoxActionPerformed
         multiplayer.setUniqueQueryParameters(uniqueQueryParametersCheckBox.isSelected());
-        String uniqueQueryParameters = uniqueQueryParametersCheckBox.isSelected() ? "1" : "0";
+        String uniqueQueryParameters = uniqueQueryParametersCheckBox.isSelected() ? TRUE : FALSE;
         saveExtensionSetting("uniqueQueryParameters", uniqueQueryParameters);
     }//GEN-LAST:event_uniqueQueryParametersCheckBoxActionPerformed
 
     private void overwriteDuplicatesCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_overwriteDuplicatesCheckBoxActionPerformed
         multiplayer.setOverwriteDuplicates(overwriteDuplicatesCheckBox.isSelected());
-        String overwrite = overwriteDuplicatesCheckBox.isSelected() ? "1" : "0";
+        String overwrite = overwriteDuplicatesCheckBox.isSelected() ? TRUE : FALSE;
         saveExtensionSetting("overwriteDuplicates", overwrite);
     }//GEN-LAST:event_overwriteDuplicatesCheckBoxActionPerformed
+
+    private void ignoreSpiderCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ignoreSpiderCheckBoxActionPerformed
+        if (ignoreSpiderCheckBox.isSelected()) {
+            multiplayer.addIgnoredTool(IBurpExtenderCallbacks.TOOL_SPIDER);   
+        } else {
+            multiplayer.removeIgnoredTool(IBurpExtenderCallbacks.TOOL_SPIDER);
+        }
+        saveIgnoredToolsList();
+    }//GEN-LAST:event_ignoreSpiderCheckBoxActionPerformed
+
+    private void ignoreIntruderCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ignoreIntruderCheckBoxActionPerformed
+        if (ignoreIntruderCheckBox.isSelected()) {
+            multiplayer.addIgnoredTool(IBurpExtenderCallbacks.TOOL_INTRUDER);   
+        } else {
+            multiplayer.removeIgnoredTool(IBurpExtenderCallbacks.TOOL_INTRUDER);
+        }
+        saveIgnoredToolsList();
+    }//GEN-LAST:event_ignoreIntruderCheckBoxActionPerformed
+
+    private void ignoreRepeaterCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ignoreRepeaterCheckBoxActionPerformed
+        if (ignoreRepeaterCheckBox.isSelected()) {
+            multiplayer.addIgnoredTool(IBurpExtenderCallbacks.TOOL_REPEATER);   
+        } else {
+            multiplayer.removeIgnoredTool(IBurpExtenderCallbacks.TOOL_REPEATER);
+        }
+        saveIgnoredToolsList();
+    }//GEN-LAST:event_ignoreRepeaterCheckBoxActionPerformed
+
+    private void ignoreDecoderCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ignoreDecoderCheckBoxActionPerformed
+        if (ignoreDecoderCheckBox.isSelected()) {
+            multiplayer.addIgnoredTool(IBurpExtenderCallbacks.TOOL_DECODER);   
+        } else {
+            multiplayer.removeIgnoredTool(IBurpExtenderCallbacks.TOOL_DECODER);
+        }
+        saveIgnoredToolsList();
+    }//GEN-LAST:event_ignoreDecoderCheckBoxActionPerformed
+
+    private void ignoreComparerCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ignoreComparerCheckBoxActionPerformed
+        if (ignoreComparerCheckBox.isSelected()) {
+            multiplayer.addIgnoredTool(IBurpExtenderCallbacks.TOOL_COMPARER);   
+        } else {
+            multiplayer.removeIgnoredTool(IBurpExtenderCallbacks.TOOL_COMPARER);
+        }
+        saveIgnoredToolsList();
+    }//GEN-LAST:event_ignoreComparerCheckBoxActionPerformed
+
+    private void ignoreExtenderCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ignoreExtenderCheckBoxActionPerformed
+        if (ignoreExtenderCheckBox.isSelected()) {
+            multiplayer.addIgnoredTool(IBurpExtenderCallbacks.TOOL_EXTENDER);   
+        } else {
+            multiplayer.removeIgnoredTool(IBurpExtenderCallbacks.TOOL_EXTENDER);
+        }
+        saveIgnoredToolsList();
+    }//GEN-LAST:event_ignoreExtenderCheckBoxActionPerformed
+
+    private void ignoreSequencerCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ignoreSequencerCheckBoxActionPerformed
+        if (ignoreSequencerCheckBox.isSelected()) {
+            multiplayer.addIgnoredTool(IBurpExtenderCallbacks.TOOL_SEQUENCER);   
+        } else {
+            multiplayer.removeIgnoredTool(IBurpExtenderCallbacks.TOOL_SEQUENCER);
+        }
+        saveIgnoredToolsList();
+    }//GEN-LAST:event_ignoreSequencerCheckBoxActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -501,13 +756,21 @@ public class OptionsPane extends javax.swing.JPanel {
     private javax.swing.JButton addIgnoreStatusCodeButton;
     private javax.swing.JButton addIgnoreURLPatternButton;
     private javax.swing.JButton disconnectButton;
+    private javax.swing.JCheckBox ignoreComparerCheckBox;
+    private javax.swing.JCheckBox ignoreDecoderCheckBox;
+    private javax.swing.JCheckBox ignoreExtenderCheckBox;
     private javax.swing.JLabel ignoreFileExtensionLabel;
+    private javax.swing.JCheckBox ignoreIntruderCheckBox;
+    private javax.swing.JCheckBox ignoreRepeaterCheckBox;
     private javax.swing.JCheckBox ignoreScannerCheckBox;
+    private javax.swing.JCheckBox ignoreSequencerCheckBox;
+    private javax.swing.JCheckBox ignoreSpiderCheckBox;
     private javax.swing.JLabel ignoreStatusCodesLabel;
     private javax.swing.JList<Pattern> ignoreURLPatternJList;
     private javax.swing.JList<String> ignoredFileExtensionJList;
     private javax.swing.JList<String> ignoredStatusCodesJList;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;

@@ -206,7 +206,7 @@ public final class ConnectionPanel extends javax.swing.JPanel {
         Integer port = Integer.parseInt(this.portNumberTextField.getText());
         String projectName = this.projectNameTextField.getText();
         try {
-            Boolean connected = this.multiplayer.Connect(hostname, port, projectName);
+            Boolean connected = this.multiplayer.connect(hostname, port, projectName);
             if (connected) {
                 
                 if (saveSettingsCheckBox.isSelected()) {

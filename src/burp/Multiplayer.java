@@ -33,12 +33,19 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     private final IExtensionHelpers helpers;
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
 
-    private Boolean ignoreScanner = true;
     private Boolean sendToImpliesInProgress = true;
     private Boolean overwriteDuplicates = false;
     private Boolean uniqueQueryParameters = false;
     
     private DefaultListModel<Pattern> ignoredURLPatterns = new DefaultListModel<>();
+    
+    private DefaultListModel<Integer> ignoredTools = new DefaultListModel<>();
+    private final List<Integer> defaultIgnoredTools = new ArrayList<>(Arrays.asList(
+        IBurpExtenderCallbacks.TOOL_SCANNER, IBurpExtenderCallbacks.TOOL_SPIDER,
+        IBurpExtenderCallbacks.TOOL_INTRUDER, IBurpExtenderCallbacks.TOOL_REPEATER,
+        IBurpExtenderCallbacks.TOOL_DECODER, IBurpExtenderCallbacks.TOOL_COMPARER,
+        IBurpExtenderCallbacks.TOOL_EXTENDER, IBurpExtenderCallbacks.TOOL_SEQUENCER
+    ));
     
     private DefaultListModel<String> ignoredExtensions = new DefaultListModel<>();
     private final List<String> defaultIgnoredExtensions = new ArrayList<>(Arrays.asList(
@@ -67,10 +74,13 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         defaultIgnoredStatusCodes.forEach(code -> {
             ignoredStatusCodes.addElement(code);
         });
+        defaultIgnoredTools.forEach(toolFlag -> {
+           ignoredTools.addElement(toolFlag); 
+        });
     }
     
     // Database = Project Name
-    public Boolean Connect(String hostname, Integer port, String database) {
+    public Boolean connect(String hostname, Integer port, String database) {
         logger.info("Connecting to '%s:%d/%s' ...", hostname, port, database);
         try {
             this.dbConn = r.connection().hostname(hostname).port(port).connect();
@@ -144,7 +154,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         logger.debug("History initialized");
     }
     
-    public Boolean IsConnected() {
+    public Boolean isConnected() {
         return dbConn != null ? dbConn.isOpen() : false;
     }
     
@@ -153,16 +163,40 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         extension.disconnect();
     }
     
-    public void setIgnoreScanner(Boolean ignoreScanner) {
-        this.ignoreScanner = ignoreScanner;
-    }
-    
     public void setSendToImpliesInProgress(Boolean theImplication) {
         sendToImpliesInProgress = theImplication;
     }
     
     public Boolean getSendToImpliesInProgress() {
         return sendToImpliesInProgress;
+    }
+    
+    // Ignore Tools
+    public void addIgnoredTool(Integer toolFlag) {
+        if (!ignoredTools.contains(toolFlag)) {
+            ignoredTools.addElement(toolFlag);
+        }
+    }
+    
+    public void removeIgnoredTool(Integer toolFlag) {
+        ignoredTools.removeElement(toolFlag);
+    }
+    
+    public Boolean isIgnoredTool(Integer toolFlag) {
+        return ignoredTools.contains(toolFlag);
+    }
+    
+    public void clearIgnoredTools() {
+        ignoredTools.removeAllElements();
+    }
+
+    public List<Integer> getIgnoredToolsList() {        
+        List<Integer> ignoredToolsList = new ArrayList();
+        Iterator<Integer> iter = ignoredTools.elements().asIterator();
+        while (iter.hasNext()) {
+            ignoredToolsList.add(iter.next());
+        }
+        return ignoredToolsList;
     }
     
     // Ignored File Extensions
@@ -185,6 +219,24 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     
     public void clearIgnoredExtensions() {
         ignoredExtensions.removeAllElements();
+    }
+
+    private String getFileExtension(URL url) {
+        String path = url.getPath();
+        int index = path.lastIndexOf(".") + 1;
+        if (index < path.length()) {
+            return path.substring(index);
+        }
+        return "";
+    }
+    
+    public List<String> getIgnoredFileExtensionsList() {
+        List<String> ignoredExtsList = new ArrayList();
+        Iterator<String> iter = ignoredExtensions.elements().asIterator();
+        while (iter.hasNext()) {
+            ignoredExtsList.add(iter.next());
+        }
+        return ignoredExtsList;
     }
     
     // Ignored Status Codes
@@ -214,7 +266,17 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     public void clearIgnoredStatusCodes() {
         ignoredStatusCodes.removeAllElements();
     }
+
+    public List<String> getIgnoredStatusCodesList() {
+        List<String> ignoredStatusCodesList = new ArrayList();
+        Iterator<String> iter = ignoredStatusCodes.elements().asIterator();
+        while (iter.hasNext()) {
+            ignoredStatusCodesList.add(iter.next());
+        }
+        return ignoredStatusCodesList;
+    }
     
+    // Ignore Patterns
     public void addIgnoredURLPattern(Pattern pattern) {
         ignoredURLPatterns.addElement(pattern);
     }
@@ -227,6 +289,20 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         return ignoredURLPatterns;
     }
     
+    public List<String> getIgnoredURLPatternsList() {
+        List<String> ignoredPatternsList = new ArrayList();
+        Iterator<Pattern> iter = ignoredURLPatterns.elements().asIterator();
+        while (iter.hasNext()) {
+            ignoredPatternsList.add(iter.next().toString());
+        }
+        return ignoredPatternsList;
+    }
+    
+    public void clearIgnoredURLPatterns() {
+        ignoredURLPatterns.removeAllElements();
+    }
+    
+    // Duplicates
     public void setOverwriteDuplicates(Boolean overwriteDuplicates) {
         this.overwriteDuplicates = overwriteDuplicates;
     }
@@ -235,6 +311,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         return overwriteDuplicates;
     }
     
+    // Query parameters as unique
     public void setUniqueQueryParameters(Boolean uniqueQueryParameters) {
         this.uniqueQueryParameters = uniqueQueryParameters;
     }
@@ -243,7 +320,9 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         return uniqueQueryParameters;
     }
 
-    // Burp HTTP Callback
+    // ---------------------
+    //  Burp HTTP Callback
+    // ---------------------
     @Override
     public void processHttpMessage(int toolFlag, boolean messageIsRequest, IHttpRequestResponse burpReqResp) { 
         if (!messageIsRequest) {
@@ -252,7 +331,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             URL url = reqInfo.getUrl();
             
             // Ignore scanner?
-            if (toolFlag == IBurpExtenderCallbacks.TOOL_SCANNER && ignoreScanner) {
+            if (isIgnoredTool(toolFlag)) {
                 logger.debug("Ignore: tools (%d) '%s'", toolFlag, url);
                 return;
             }
@@ -357,32 +436,5 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     public void onEdit(String id, String field, Object value) {
         http().get(id).update(r.hashMap(field.toLowerCase(), value)).run(dbConn);
     }
-    
-    private String getFileExtension(URL url) {
-        String path = url.getPath();
-        int index = path.lastIndexOf(".") + 1;
-        if (index < path.length()) {
-            return path.substring(index);
-        }
-        return "";
-    }
-    
-    public List<String> getIgnoredFileExtensionsList() {
-        List<String> ignoredExtsList = new ArrayList();
-        Iterator<String> iter = ignoredExtensions.elements().asIterator();
-        while (iter.hasNext()) {
-            ignoredExtsList.add(iter.next());
-        }
-        return ignoredExtsList;
-    }
-    
-    public List<String> getIgnoredStatusCodesList() {
-        List<String> ignoredStatusCodesList = new ArrayList();
-        Iterator<String> iter = ignoredStatusCodes.elements().asIterator();
-        while (iter.hasNext()) {
-            ignoredStatusCodesList.add(iter.next());
-        }
-        return ignoredStatusCodesList;
-    }
-
+   
 }
