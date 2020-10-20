@@ -88,8 +88,10 @@
                 <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
                   <TableColumnModel selectionModel="1"/>
                 </Property>
-                <Property name="columnSelectionAllowed" type="boolean" value="true"/>
-                <Property name="selectionMode" type="int" value="0" postCode="inScopeTable.setRowSelectionAllowed(true);&#xa;inScopeTable.setColumnSelectionAllowed(false);&#xa;sorter = new TableRowSorter&lt;TableModel&gt;(inScopeTable.getModel());&#xa;inScopeTable.setRowSorter(sorter);"/>
+                <Property name="columnSelectionAllowed" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="false" type="code"/>
+                </Property>
+                <Property name="selectionMode" type="int" value="0" postCode="inScopeTable.setRowSelectionAllowed(true);&#xa;sorter = new TableRowSorter&lt;TableModel&gt;(inScopeTable.getModel());&#xa;inScopeTable.setRowSorter(sorter);"/>
                 <Property name="tableHeader" type="javax.swing.table.JTableHeader" editor="org.netbeans.modules.form.editors2.JTableHeaderEditor">
                   <TableHeader reorderingAllowed="true" resizingAllowed="true"/>
                 </Property>

@@ -76,7 +76,7 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
         int highlightColumnIndex = HTTPHistory.columns.indexOf(HTTPHistory.Highlight);
         TableColumn highlightColumn = inScopeTable.getColumnModel().getColumn(highlightColumnIndex);
         JComboBox highlightComboBox = new JComboBox();
-        for (String colorName : multiplayer.history.highlights) {
+        for (String colorName : HTTPHistory.highlights) {
             highlightComboBox.addItem(colorName);
         }
         highlightColumn.setCellEditor(new DefaultCellEditor(highlightComboBox));
@@ -85,7 +85,7 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
         int assessmentColumnIndex = HTTPHistory.columns.indexOf(HTTPHistory.Assessment);
         TableColumn assessmentColumn = inScopeTable.getColumnModel().getColumn(assessmentColumnIndex);
         JComboBox assessmentStateComboBox = new JComboBox();
-        for (String state : multiplayer.history.assessmentStates) {
+        for (String state : HTTPHistory.assessmentStates) {
             assessmentStateComboBox.addItem(state);
         }
         assessmentColumn.setCellEditor(new DefaultCellEditor(assessmentStateComboBox));
@@ -95,14 +95,11 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
         this.multiplayer.history.addTableModelListener(this);
         
         // Row Selection Listener
-        rowSelectionListener = new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent event) {
-                if (!event.getValueIsAdjusting()) {
-                    String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
-                    displayMessageEditorFor(reqRespId);
-                    updateAvailibleFilters(reqRespId);
-                }
+        rowSelectionListener = (ListSelectionEvent event) -> {
+            if (!event.getValueIsAdjusting()) {
+                String reqRespId = (String) inScopeTable.getValueAt(inScopeTable.getSelectedRow(), 0);
+                displayMessageEditorFor(reqRespId);
+                updateAvailibleFilters(reqRespId);
             }
         };
         inScopeTable.getSelectionModel().addListSelectionListener(rowSelectionListener);
@@ -162,7 +159,7 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
     private void applyRowFilter() {
         if (multiplayer.history.size() < 1) {
             return;
-        }        
+        }
         sorter.setRowFilter(new RowFilter<TableModel, Integer>() {
             
             @Override
@@ -441,10 +438,9 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
         parentSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
         inScopeTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        inScopeTable.setColumnSelectionAllowed(true);
+        inScopeTable.setColumnSelectionAllowed(false);
         inScopeTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         inScopeTable.setRowSelectionAllowed(true);
-        inScopeTable.setColumnSelectionAllowed(false);
         sorter = new TableRowSorter<TableModel>(inScopeTable.getModel());
         inScopeTable.setRowSorter(sorter);
         inScopeTablePane.setViewportView(inScopeTable);
