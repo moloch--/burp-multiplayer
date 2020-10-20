@@ -5,6 +5,7 @@
  */
 package burp;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -35,7 +36,9 @@ public class MultiplayerLogger {
     public MultiplayerLogger(IBurpExtenderCallbacks callbacks) {
         this.callbacks = callbacks;
         try {
-            logFile = new FileWriter("/tmp/burp-multiplayer.log");
+            File file = File.createTempFile("burp-multiplayer", null);
+            logFile = new FileWriter(file.getAbsolutePath());
+            callbacks.printOutput(String.format("Log file: %s", file.getAbsolutePath()));
         } catch(IOException ex) {}
     }
     
