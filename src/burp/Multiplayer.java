@@ -31,7 +31,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     private final IBurpExtenderCallbacks callbacks;
     private final BurpExtender extension;
     private final IExtensionHelpers helpers;
-    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+    private final ExecutorService executor = Executors.newFixedThreadPool(6);
 
     private Boolean sendToImpliesInProgress = true;
     private Boolean overwriteDuplicates = false;
@@ -98,10 +98,12 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
                 createDatabase();
             }
 
+            // This is a workaround because sometimes the RethinkDB cursor
+            // hangs while loading the history. So executing it in another thread
+            // at least prevents the entire app from locking up.
             executor.submit(() -> { initalizeHistory(); });
 
-            history.registerOnEditCallback(this);
-            
+            history.registerOnEditCallback(this);            
             executor.submit(() -> {
                 Result<ChangefeedMessage> changes = http().changes().run(dbConn, ChangefeedMessage.class);
                 for (ChangefeedMessage msg : changes) {
