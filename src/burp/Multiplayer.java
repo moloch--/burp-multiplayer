@@ -98,7 +98,8 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
                 createDatabase();
             }
 
-            initalizeHistory();
+            executor.submit(() -> { initalizeHistory(); });
+
             history.registerOnEditCallback(this);
             
             executor.submit(() -> {
