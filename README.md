@@ -2,6 +2,8 @@
 
 A Multiplayer Plugin for Burp. Sync's in-scope requests/responses, comments, and highlights in realtime.
 
+![Java CI with Gradle](https://github.com/moloch--/burp-multiplayer/workflows/Java%20CI%20with%20Gradle/badge.svg)
+
 ![Demo](/.github/demo.gif?raw=true "Demo")
 
 
