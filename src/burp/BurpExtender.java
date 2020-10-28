@@ -12,13 +12,14 @@ import javax.swing.JPanel;
  */
 public class BurpExtender implements IBurpExtender, ITab {
 
-    private static final String name = "Multiplayer";
     private static IBurpExtenderCallbacks callbacks;
     private static JPanel rootPanel;
+    
+    private static final String name = "Multiplayer";
     private static MainPanel mainPanel;
-    private static MultiplayerLogger logger;
 
     private static Multiplayer multiplayer;
+    private static MultiplayerLogger logger;
 
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
@@ -48,6 +49,7 @@ public class BurpExtender implements IBurpExtender, ITab {
             BurpExtender.multiplayer = new Multiplayer(this, logger);
             
             // Root Panel
+            // If we diconnect/re-connect rootPanel will already exist
             if (BurpExtender.rootPanel == null) {
                 BurpExtender.rootPanel = new MultiplayerRootPanel();    
             }
