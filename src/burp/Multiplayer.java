@@ -407,7 +407,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     }
     
     public void reqRespRemove(String reqRespId) {
-        http().get(reqRespId).delete().run(dbConn);
+        http().get(reqRespId).delete().runNoReply(dbConn);
     }
     
     public Boolean isDuplicate(IHttpRequestResponse reqResp) {
