@@ -394,7 +394,7 @@
     </Component>
     <Component class="javax.swing.JCheckBox" name="uniqueQueryParametersCheckBox">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Include Query Parameters in Unqiueness"/>
+        <Property name="text" type="java.lang.String" value="Include Query Parameters in Uniqueness"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="uniqueQueryParametersCheckBoxActionPerformed"/>

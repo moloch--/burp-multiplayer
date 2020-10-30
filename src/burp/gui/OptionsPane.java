@@ -398,7 +398,7 @@ public class OptionsPane extends javax.swing.JPanel {
             }
         });
 
-        uniqueQueryParametersCheckBox.setText("Include Query Parameters in Unqiueness");
+        uniqueQueryParametersCheckBox.setText("Include Query Parameters in Uniqueness");
         uniqueQueryParametersCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 uniqueQueryParametersCheckBoxActionPerformed(evt);
