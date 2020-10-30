@@ -38,7 +38,7 @@ public class SelectProjectPanel extends javax.swing.JPanel {
         initComponents();
     }
     
-    public void initProjectList() {
+    public void fetchProjectList() {
         logger.debug("Fetching project list ...");
         projectListModel.clear();
         List<String> projects = multiplayer.getProjects();
@@ -78,6 +78,7 @@ public class SelectProjectPanel extends javax.swing.JPanel {
         deleteProjectButton = new javax.swing.JButton();
 
         projectsJList.setModel(projectListModel);
+        projectsJList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(projectsJList);
 
         createProjectButton.setText("Create Project");
@@ -154,7 +155,7 @@ public class SelectProjectPanel extends javax.swing.JPanel {
             if (confirmation == 0) {
                 multiplayer.deleteProject(project);
                 projectsJList.clearSelection();
-                initProjectList();
+                fetchProjectList();
             }
         }
     }//GEN-LAST:event_deleteProjectButtonActionPerformed

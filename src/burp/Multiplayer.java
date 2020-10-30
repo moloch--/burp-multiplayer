@@ -32,7 +32,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     
     private Integer dbCount;
     private Integer dbLoaded;
-    private final List<OnLoadEventCallback> onLoadEventCallbacks = new ArrayList<>();
+    private final List<OnLoadCallback> onLoadEventCallbacks = new ArrayList<>();
     
     private final IBurpExtenderCallbacks callbacks;
     private final BurpExtender extension;
@@ -175,19 +175,27 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             Result<Integer> countCursor = http().count().run(dbConnect(), Integer.class);
             dbCount = countCursor.single();
             logger.debug("Expect %d  results ...", dbCount);
-            dbLoaded = 0;
+            
+            dbLoaded = 0; // We need to initialize this before any OnLoad event
             
             if (dbCount < 1) {
                 triggerOnLoadEvent();
                 return;
             }
             
+             // This can be increased to reduce the number of queries used to
+             // load the history, but in my testing it doesn't seem to have a
+             // major impact on load times so I left it at 1 for now.
+            int step = 1;
+            
             while (dbLoaded < dbCount) {
-                Result<MultiplayerRequestResponse> result = http().skip(dbLoaded).limit(1).run(dbConn, MultiplayerRequestResponse.class);    
-                MultiplayerRequestResponse entry = result.single();
-                logger.debug("Got entry %d of %d: %s", dbLoaded, dbCount, entry);
-                history.add(entry);
-                dbLoaded++;
+                Result<MultiplayerRequestResponse> result = http().skip(dbLoaded).limit(step).run(dbConn, MultiplayerRequestResponse.class);    
+                while (result.hasNext()) {
+                    MultiplayerRequestResponse entry = result.next();
+                    logger.debug("Got entry %d of %d: %s", dbLoaded, dbCount, entry);
+                    history.add(entry);
+                }
+                dbLoaded += step;
                 triggerOnLoadEvent();
             }
             logger.debug("Results done.");
@@ -481,11 +489,11 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         return r.connection().hostname(dbHostname).port(dbPort).connect();
     }
     
-    public void registerOnLoadEventCallback(OnLoadEventCallback callback) {
+    public void registerOnLoadEventCallback(OnLoadCallback callback) {
         onLoadEventCallbacks.add(callback);
     }
     
-    public void unregisterOnLoadEventCallback(OnLoadEventCallback callback) {
+    public void unregisterOnLoadEventCallback(OnLoadCallback callback) {
         onLoadEventCallbacks.remove(callback);
     }
     

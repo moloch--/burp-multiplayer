@@ -8,16 +8,16 @@ package burp.gui;
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
 import burp.MultiplayerLogger;
-import burp.OnLoadEventCallback;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import burp.OnLoadCallback;
 
 /**
  *
  * @author moloch
  */
-public class LoadingPanel extends javax.swing.JPanel implements OnLoadEventCallback {
+public class LoadingPanel extends javax.swing.JPanel implements OnLoadCallback {
 
     private final Multiplayer multiplayer;
     private final List<Runnable> onCompleteCallbacks = new ArrayList<>();
@@ -39,26 +39,27 @@ public class LoadingPanel extends javax.swing.JPanel implements OnLoadEventCallb
     public void initialize() {
         multiplayer.registerOnLoadEventCallback(this);
         multiplayer.initializeHistory();
+        multiplayer.startChangefeed();
     }
     
     @Override
     public void onLoad(Integer loaded, Integer count) {
         logger.debug("Loaded event: %d of %d", loaded, count);
         
+        if (loaded == null || count == null || count <= loaded) {
+            logger.debug("History initialization completed");
+            onComplete();
+        }
+        
         if (0 < count) {
             float progress = (float) loaded / (float) count;
             loadingProgressBar.setValue((int) Math.round(progress * 100.0));   
         }
         
-        if (Objects.equals(loaded, count)) {
-            logger.debug("History initialization completed");
-            onComplete();
-        }
     }
     
     private void onComplete() {
         multiplayer.unregisterOnLoadEventCallback(this);
-        multiplayer.startChangefeed();
         triggerOnCompleteCallbacks();
     }
     

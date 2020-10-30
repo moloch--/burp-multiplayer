@@ -67,7 +67,7 @@ public class BurpExtender implements IBurpExtender, ITab {
                 BurpExtender.rootPanel.remove(connectionPanel);
                 
                 // Select Project Panel
-                selectProjectPanel.initProjectList();
+                selectProjectPanel.fetchProjectList();
                 BurpExtender.rootPanel.add(selectProjectPanel);
                 BurpExtender.rootPanel.repaint();
                 BurpExtender.rootPanel.revalidate();

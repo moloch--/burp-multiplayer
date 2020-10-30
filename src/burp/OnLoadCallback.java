@@ -9,7 +9,7 @@ package burp;
  *
  * @author moloch
  */
-public interface OnLoadEventCallback {
+public interface OnLoadCallback {
     
     public void onLoad(Integer loaded, Integer count);
 
