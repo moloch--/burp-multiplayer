@@ -26,7 +26,13 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     private static final RethinkDB r = RethinkDB.r;
     private static final String HTTPTable = "http";
     private Connection dbConn = null;
+    private String dbHostname;
+    private Integer dbPort;
     private String dbName;  // Database Name aka 'Project Name'
+    
+    private Integer dbCount;
+    private Integer dbLoaded;
+    private final List<OnLoadEventCallback> onLoadEventCallbacks = new ArrayList<>();
     
     private final IBurpExtenderCallbacks callbacks;
     private final BurpExtender extension;
@@ -37,7 +43,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     private Boolean overwriteDuplicates = false;
     private Boolean uniqueQueryParameters = false;
     
-    private DefaultListModel<Pattern> ignoredURLPatterns = new DefaultListModel<>();
+    private final DefaultListModel<Pattern> ignoredURLPatterns = new DefaultListModel<>();
     
     private DefaultListModel<Integer> ignoredTools = new DefaultListModel<>();
     private final List<Integer> defaultIgnoredTools = new ArrayList<>(Arrays.asList(
@@ -82,8 +88,10 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     // Database = Project Name
     public Boolean connect(String hostname, Integer port, String database) {
         logger.info("Connecting to '%s:%d/%s' ...", hostname, port, database);
+        dbHostname = hostname;
+        dbPort = port;
         try {
-            this.dbConn = r.connection().hostname(hostname).port(port).connect();
+            dbConn = this.dbConnect();
         } catch (ReqlDriverError err) {
             logger.warn("Failed to connect to database: %s", err);
             throw err;
@@ -97,28 +105,34 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             if (!dbList.contains(dbName)) {
                 createDatabase();
             }
-
-            // This is a workaround because sometimes the RethinkDB cursor
-            // hangs while loading the history. So executing it in another thread
-            // at least prevents the entire app from locking up.
-            executor.submit(() -> { initalizeHistory(); });
-
-            history.registerOnEditCallback(this);            
-            executor.submit(() -> {
-                Result<ChangefeedMessage> changes = http().changes().run(dbConn, ChangefeedMessage.class);
-                for (ChangefeedMessage msg : changes) {
-                    if (msg.getNewVal() != null) {
-                        history.add(msg.getNewVal());
-                    } else if (msg.getNewVal() == null && msg.getOldVal() != null) {
-                        history.remove(msg.getOldVal().getId());
-                    }
-                }
-            });
             logger.debug("Connected!");
             return true;
         } else {
             return false;
         }
+    }
+    
+    // This is a workaround because sometimes the RethinkDB cursor
+    // hangs while loading the history. So executing it in another thread
+    // at least prevents the entire app from locking up.
+    public void initializeHistory() {
+        executor.submit(() -> { initalizeHistory(); });
+        logger.debug("History non-blocking initialize...");
+    }
+    
+    public void startChangefeed() {
+        logger.debug("Starting changefeed ...");
+        history.registerOnEditCallback(this);
+        executor.submit(() -> {
+            Result<ChangefeedMessage> changes = http().changes().run(dbConn, ChangefeedMessage.class);
+            for (ChangefeedMessage msg : changes) {
+                if (msg.getNewVal() != null) {
+                    history.add(msg.getNewVal());
+                } else if (msg.getNewVal() == null && msg.getOldVal() != null) {
+                    history.remove(msg.getOldVal().getId());
+                }
+            }
+        });
     }
 
     private void createDatabase() {
@@ -131,32 +145,46 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         r.db(dbName).tableCreate(HTTPTable).run(dbConn);
         
         // Create Indexes
-        r.db(dbName).table(HTTPTable).indexCreate("protocol").run(dbConn);
-        r.db(dbName).table(HTTPTable).indexCreate("host").run(dbConn);
-        r.db(dbName).table(HTTPTable).indexCreate("port").run(dbConn);
-        r.db(dbName).table(HTTPTable).indexCreate("path").run(dbConn);
-        r.db(dbName).table(HTTPTable).indexCreate("method").run(dbConn);
-        r.db(dbName).table(HTTPTable).indexCreate("status").run(dbConn);
-        r.db(dbName).table(HTTPTable).indexCreate("highlight").run(dbConn);
+//        r.db(dbName).table(HTTPTable).indexCreate("protocol").run(dbConn);
+//        r.db(dbName).table(HTTPTable).indexCreate("host").run(dbConn);
+//        r.db(dbName).table(HTTPTable).indexCreate("port").run(dbConn);
+//        r.db(dbName).table(HTTPTable).indexCreate("path").run(dbConn);
+//        r.db(dbName).table(HTTPTable).indexCreate("method").run(dbConn);
+//        r.db(dbName).table(HTTPTable).indexCreate("status").run(dbConn);
+//        r.db(dbName).table(HTTPTable).indexCreate("highlight").run(dbConn);
     }
     
     private void initalizeHistory() {
         logger.debug("Initializing history ...");
+        
         try {
-            Result<MultiplayerRequestResponse> result = http().run(dbConn, MultiplayerRequestResponse.class);
-            logger.debug("Got history ...");
-            while (result.hasNext()) {
+            Result<Integer> countCursor = http().count().run(dbConnect(), Integer.class);
+            dbCount = countCursor.next();
+            logger.debug("Expect %d  results ...", dbCount);
+            dbLoaded = 0;
+            
+            if (dbCount < 1) {
+                triggerOnLoadEvent();
+                return;
+            }
+            
+            while (dbLoaded < dbCount) {
+                Result<MultiplayerRequestResponse> result = http().skip(dbLoaded).limit(1).run(dbConn, MultiplayerRequestResponse.class);    
                 MultiplayerRequestResponse entry = result.next();
-                logger.debug("Got entry: %s", entry);
+                logger.debug("Got entry %d of %d: %s", dbLoaded, dbCount, entry);
                 history.add(entry);
+                dbLoaded++;
+                triggerOnLoadEvent();
             }
             logger.debug("Results done.");
+            
         } catch(Exception err) {
             logger.error(err);
         }
+        
         logger.debug("History initialized");
     }
-    
+
     public Boolean isConnected() {
         return dbConn != null ? dbConn.isOpen() : false;
     }
@@ -433,6 +461,24 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     // Database Helpers
     private Table http() {
         return r.db(dbName).table(HTTPTable);
+    }
+    
+    private Connection dbConnect() {
+        return r.connection().hostname(dbHostname).port(dbPort).connect();
+    }
+    
+    public void registerOnLoadEventCallback(OnLoadEventCallback callback) {
+        onLoadEventCallbacks.add(callback);
+    }
+    
+    public void unregisterOnLoadEventCallback(OnLoadEventCallback callback) {
+        onLoadEventCallbacks.remove(callback);
+    }
+    
+    private void triggerOnLoadEvent() {
+        onLoadEventCallbacks.forEach(callback -> {
+            executor.submit(() -> { callback.onLoad(dbLoaded, dbCount); });
+        });
     }
 
     @Override

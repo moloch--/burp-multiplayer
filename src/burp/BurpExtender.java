@@ -2,6 +2,7 @@ package burp;
 
 import burp.gui.MultiplayerRootPanel;
 import burp.gui.ConnectionPanel;
+import burp.gui.LoadingPanel;
 import burp.gui.MainPanel;
 import java.awt.Component;
 import javax.swing.JPanel;
@@ -56,20 +57,28 @@ public class BurpExtender implements IBurpExtender, ITab {
             
             // ConnectionPanel
             ConnectionPanel connectionPanel = new ConnectionPanel(multiplayer, logger);
+            LoadingPanel loadingPanel = new LoadingPanel(multiplayer, logger);
             BurpExtender.rootPanel.add(connectionPanel);
 
             connectionPanel.onConnection(() -> {
                 logger.debug("onConnection()");
                 BurpExtender.rootPanel.remove(connectionPanel);
-
-                BurpExtender.mainPanel = new MainPanel(multiplayer, logger);
-                BurpExtender.rootPanel.add(mainPanel);
-
-                // HTTP Listener
-                BurpExtender.callbacks.registerHttpListener(multiplayer);
-
+                
+                BurpExtender.rootPanel.add(loadingPanel);             
                 BurpExtender.rootPanel.repaint();
                 BurpExtender.rootPanel.revalidate();
+                loadingPanel.initialize();
+                loadingPanel.registerOnCompleteCallback(() -> {
+                    BurpExtender.rootPanel.remove(loadingPanel);
+                    BurpExtender.mainPanel = new MainPanel(multiplayer, logger);
+                    BurpExtender.rootPanel.add(mainPanel);
+
+                    // HTTP Listener
+                    BurpExtender.callbacks.registerHttpListener(multiplayer);
+                    BurpExtender.rootPanel.repaint();
+                    BurpExtender.rootPanel.revalidate();    
+                });
+                
             });
             
             BurpExtender.rootPanel.repaint();
