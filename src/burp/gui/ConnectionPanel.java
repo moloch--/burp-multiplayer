@@ -8,7 +8,13 @@ package burp.gui;
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
 import burp.MultiplayerLogger;
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -22,6 +28,9 @@ public final class ConnectionPanel extends javax.swing.JPanel {
     private final IBurpExtenderCallbacks callbacks;
     private final MultiplayerLogger logger;
     
+    private static final String helpURI = "https://github.com/moloch--/burp-multiplayer/wiki/RethinkDB-Setup";
+    private static final String githubURI = "https://github.com/moloch--/burp-multiplayer";
+    
     /**
      * Creates new form ConnectionPanel
      * @param multiplayer
@@ -33,16 +42,9 @@ public final class ConnectionPanel extends javax.swing.JPanel {
         this.multiplayer = multiplayer;
         initComponents();
         initLoadSettings();
-        if (projectNameTextField.getText().isBlank() || projectNameTextField.getText().isEmpty()) {
-            connectButton.setEnabled(false);
-        }
     }
     
     public void initLoadSettings() {
-        String projectName = loadExtensionSetting("projectName");
-        if (projectName != null) {
-            projectNameTextField.setText(projectName);
-        }
         String hostname = loadExtensionSetting("hostname");
         if (hostname != null) {
             hostnameTextField.setText(hostname);
@@ -89,11 +91,11 @@ public final class ConnectionPanel extends javax.swing.JPanel {
         hostnameTextField = new javax.swing.JTextField();
         portNumberLabel = new javax.swing.JLabel();
         portNumberTextField = new javax.swing.JTextField();
-        projectNameLabel = new javax.swing.JLabel();
-        projectNameTextField = new javax.swing.JTextField();
         titleLabel = new javax.swing.JLabel();
         connectButton = new javax.swing.JButton();
         saveSettingsCheckBox = new javax.swing.JCheckBox();
+        setupHelpButton = new javax.swing.JButton();
+        githubButton = new javax.swing.JButton();
 
         hoastnameLabel.setText("Hostname");
 
@@ -110,20 +112,7 @@ public final class ConnectionPanel extends javax.swing.JPanel {
         portNumberTextField.setColumns(10);
         portNumberTextField.setText("28015");
 
-        projectNameLabel.setText("Project Name");
-
-        projectNameTextField.setColumns(10);
-        projectNameTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                projectNameTextFieldActionPerformed(evt);
-            }
-        });
-        projectNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                projectNameTextFieldKeyReleased(evt);
-            }
-        });
-
+        titleLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
         titleLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         titleLabel.setText("RethinkDB Connection");
 
@@ -143,21 +132,31 @@ public final class ConnectionPanel extends javax.swing.JPanel {
             }
         });
 
+        setupHelpButton.setText("Setup Help");
+        setupHelpButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                setupHelpButtonActionPerformed(evt);
+            }
+        });
+
+        githubButton.setLabel("GitHub");
+        githubButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                githubButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(30, 30, 30)
+                .addContainerGap(400, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(saveSettingsCheckBox)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                         .addComponent(titleLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addComponent(projectNameLabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(projectNameTextField))
                             .addComponent(connectButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -167,17 +166,23 @@ public final class ConnectionPanel extends javax.swing.JPanel {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(hostnameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(portNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
-                .addContainerGap(401, Short.MAX_VALUE))
+                .addContainerGap(400, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(setupHelpButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(githubButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(12, 12, 12)
+                .addGap(9, 9, 9)
+                .addComponent(setupHelpButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(githubButton)
+                .addGap(122, 122, 122)
                 .addComponent(titleLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(projectNameLabel)
-                    .addComponent(projectNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(hostnameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -190,7 +195,7 @@ public final class ConnectionPanel extends javax.swing.JPanel {
                 .addComponent(saveSettingsCheckBox)
                 .addGap(11, 11, 11)
                 .addComponent(connectButton)
-                .addContainerGap(320, Short.MAX_VALUE))
+                .addContainerGap(323, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -204,13 +209,12 @@ public final class ConnectionPanel extends javax.swing.JPanel {
         
         String hostname = this.hostnameTextField.getText();
         Integer port = Integer.parseInt(this.portNumberTextField.getText());
-        String projectName = this.projectNameTextField.getText();
+
         try {
-            Boolean connected = this.multiplayer.connect(hostname, port, projectName);
+            Boolean connected = this.multiplayer.connect(hostname, port);
             if (connected) {
                 
                 if (saveSettingsCheckBox.isSelected()) {
-                    saveExtensionSetting("projectName", projectName);
                     saveExtensionSetting("hostname", hostname);
                     saveExtensionSetting("port", String.format("%d", port));
                 }
@@ -231,29 +235,40 @@ public final class ConnectionPanel extends javax.swing.JPanel {
 
     }//GEN-LAST:event_saveSettingsCheckBoxActionPerformed
 
-    private void projectNameTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_projectNameTextFieldActionPerformed
-
-    }//GEN-LAST:event_projectNameTextFieldActionPerformed
-
-    private void projectNameTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_projectNameTextFieldKeyReleased
-        if (0 < projectNameTextField.getText().length()) {
-            connectButton.setEnabled(true);
+    private void setupHelpButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setupHelpButtonActionPerformed
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            try {
+                Desktop.getDesktop().browse(new URI(helpURI));
+            } catch (IOException err) {
+                logger.error(err);
+            } catch (URISyntaxException err) {
+                logger.error(err);
+            }
         }
-        if (projectNameTextField.getText().isBlank() || projectNameTextField.getText().isEmpty()) {
-            connectButton.setEnabled(false);
+    }//GEN-LAST:event_setupHelpButtonActionPerformed
+
+    private void githubButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_githubButtonActionPerformed
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            try {
+                Desktop.getDesktop().browse(new URI(githubURI));
+            } catch (IOException err) {
+                logger.error(err);
+            } catch (URISyntaxException err) {
+                logger.error(err);
+            }
         }
-    }//GEN-LAST:event_projectNameTextFieldKeyReleased
+    }//GEN-LAST:event_githubButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton connectButton;
+    private javax.swing.JButton githubButton;
     private javax.swing.JLabel hoastnameLabel;
     private javax.swing.JTextField hostnameTextField;
     private javax.swing.JLabel portNumberLabel;
     private javax.swing.JTextField portNumberTextField;
-    private javax.swing.JLabel projectNameLabel;
-    private javax.swing.JTextField projectNameTextField;
     private javax.swing.JCheckBox saveSettingsCheckBox;
+    private javax.swing.JButton setupHelpButton;
     private javax.swing.JLabel titleLabel;
     // End of variables declaration//GEN-END:variables
 }

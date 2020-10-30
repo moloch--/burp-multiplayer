@@ -29,7 +29,7 @@ public class MainPanel extends javax.swing.JPanel {
         // this.multiplayer = multiplayer;
 
         // Initialize Tabs
-        InScopePane inScopePane = new InScopePane(multiplayer, logger);
+        InScopePanel inScopePane = new InScopePanel(multiplayer, logger);
         this.mainTabbedPane.addTab("In-Scope", inScopePane);
         
         OptionsPane optionsPane = new OptionsPane(multiplayer, logger);

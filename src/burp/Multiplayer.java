@@ -86,8 +86,8 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     }
     
     // Database = Project Name
-    public Boolean connect(String hostname, Integer port, String database) {
-        logger.info("Connecting to '%s:%d/%s' ...", hostname, port, database);
+    public Boolean connect(String hostname, Integer port) {
+        logger.info("Connecting to '%s:%d' ...", hostname, port);
         dbHostname = hostname;
         dbPort = port;
         try {
@@ -98,14 +98,6 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         }
         if (dbConn.isOpen()) {
             logger.debug("Successfully connected: %s", dbConn);
-            dbName = database;
-            
-            Result<Object> result = r.dbList().run(dbConn);
-            ArrayList<String> dbList = (ArrayList<String>) result.single();
-            if (!dbList.contains(dbName)) {
-                createDatabase();
-            }
-            logger.debug("Connected!");
             return true;
         } else {
             return false;
@@ -134,6 +126,28 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             }
         });
     }
+    
+    public List<String> getProjects() {
+        if (isConnected()) {
+            Result<Object> result = r.dbList().run(dbConn);
+            return (ArrayList<String>) result.single();
+        }
+        return new ArrayList<>();
+    }
+    
+    public void setProject(String projectName) {
+        dbName = projectName;
+        logger.debug("Database/project name: %s", projectName);
+        Result<Object> result = r.dbList().run(dbConn);
+        ArrayList<String> dbList = (ArrayList<String>) result.single();
+        if (!dbList.contains(dbName)) {
+            createDatabase();
+        }
+    }
+    
+    public void deleteProject(String projectName) {
+        r.dbDrop(projectName).run(dbConn);
+    }
 
     private void createDatabase() {
         logger.info("Database '%s' does not exist, initializing ...", dbName);
@@ -159,7 +173,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         
         try {
             Result<Integer> countCursor = http().count().run(dbConnect(), Integer.class);
-            dbCount = countCursor.next();
+            dbCount = countCursor.single();
             logger.debug("Expect %d  results ...", dbCount);
             dbLoaded = 0;
             
@@ -170,7 +184,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             
             while (dbLoaded < dbCount) {
                 Result<MultiplayerRequestResponse> result = http().skip(dbLoaded).limit(1).run(dbConn, MultiplayerRequestResponse.class);    
-                MultiplayerRequestResponse entry = result.next();
+                MultiplayerRequestResponse entry = result.single();
                 logger.debug("Got entry %d of %d: %s", dbLoaded, dbCount, entry);
                 history.add(entry);
                 dbLoaded++;

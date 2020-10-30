@@ -46,7 +46,7 @@ import javax.swing.JTable;
  *
  * @author moloch
  */
-public final class InScopePane extends javax.swing.JPanel implements TableModelListener {
+public final class InScopePanel extends javax.swing.JPanel implements TableModelListener {
 
     private final Multiplayer multiplayer;
     private final IBurpExtenderCallbacks callbacks;
@@ -59,7 +59,7 @@ public final class InScopePane extends javax.swing.JPanel implements TableModelL
      * @param multiplayer
      * @param logger
      */
-    public InScopePane(Multiplayer multiplayer, MultiplayerLogger logger) {
+    public InScopePanel(Multiplayer multiplayer, MultiplayerLogger logger) {
         this.callbacks = logger.callbacks;
         this.logger = logger;
         this.multiplayer = multiplayer;
