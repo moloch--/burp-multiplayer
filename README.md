@@ -12,7 +12,7 @@ A Multiplayer Plugin for Burp. Sync's in-scope requests/responses, comments, hig
 
 [Download and install the extension](https://github.com/moloch--/burp-multiplayer/releases), connect multiple instances to the same [RethinkDB](https://rethinkdb.com/) instance.
 
-You can use `rethinkdb.sh` to start a locally running instance in a Docker container. You can use `ssh -L <local_port>:localhost:<driver_port> <ip_of_rethinkdb_server>` to access a remote RethinkDB instance using an SSH tunnel.
+For details on setting up RethinkDB see the [wiki](https://github.com/moloch--/burp-multiplayer/wiki/RethinkDB-Setup).
  
 This extension relies on a lot of interaction with the RethinkDB database, for the best experiance ensure you have a fast connection to the database, and that it has sufficient CPU/memory. Large requests/responses may cause the GUI to become sluggish over slow connections (everything is currently loaded eagerly), consider filtering some of these larger requests in the Options panel.
 
