@@ -601,13 +601,13 @@ public class OptionsPane extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void addIgnoreFileExtensionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addIgnoreFileExtensionButtonActionPerformed
-        String fileExt = JOptionPane.showInputDialog("Add file extension:");
+        String fileExt = JOptionPane.showInputDialog(null, "Add file extension:", "File Extension", JOptionPane.QUESTION_MESSAGE);
         multiplayer.addIgnoredExtension(fileExt);
         saveIgnoredFileExtensionList();
     }//GEN-LAST:event_addIgnoreFileExtensionButtonActionPerformed
 
     private void addIgnoreStatusCodeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addIgnoreStatusCodeButtonActionPerformed
-        String status = JOptionPane.showInputDialog("Add status code:");
+        String status = JOptionPane.showInputDialog(null, "Add status code:", "Status Code", JOptionPane.QUESTION_MESSAGE);
         multiplayer.addIgnoredStatusCodes(status);
         saveIgnoredStatusCodesList();
     }//GEN-LAST:event_addIgnoreStatusCodeButtonActionPerformed
@@ -654,7 +654,7 @@ public class OptionsPane extends javax.swing.JPanel {
     }//GEN-LAST:event_logLevelComboBoxActionPerformed
 
     private void addIgnoreURLPatternButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addIgnoreURLPatternButtonActionPerformed
-        String rawPattern = JOptionPane.showInputDialog("Add URL pattern:");
+        String rawPattern = JOptionPane.showInputDialog(null, "Add URL pattern:", "URL Pattern", JOptionPane.QUESTION_MESSAGE);
         try {
             Pattern pattern = Pattern.compile(rawPattern, Pattern.CASE_INSENSITIVE);
             multiplayer.addIgnoredURLPattern(pattern);

@@ -4,6 +4,7 @@ import burp.gui.MultiplayerRootPanel;
 import burp.gui.ConnectionPanel;
 import burp.gui.LoadingPanel;
 import burp.gui.MainPanel;
+import burp.gui.SelectProjectPanel;
 import java.awt.Component;
 import javax.swing.JPanel;
 
@@ -54,31 +55,43 @@ public class BurpExtender implements IBurpExtender, ITab {
             if (BurpExtender.rootPanel == null) {
                 BurpExtender.rootPanel = new MultiplayerRootPanel();    
             }
-            
-            // ConnectionPanel
+
+            // Initialize all panels
             ConnectionPanel connectionPanel = new ConnectionPanel(multiplayer, logger);
             LoadingPanel loadingPanel = new LoadingPanel(multiplayer, logger);
+            SelectProjectPanel selectProjectPanel = new SelectProjectPanel(multiplayer, logger);
+            
+            // ConnectionPanel            
             BurpExtender.rootPanel.add(connectionPanel);
-
             connectionPanel.onConnection(() -> {
-                logger.debug("onConnection()");
                 BurpExtender.rootPanel.remove(connectionPanel);
                 
-                BurpExtender.rootPanel.add(loadingPanel);             
+                // Select Project Panel
+                selectProjectPanel.initProjectList();
+                BurpExtender.rootPanel.add(selectProjectPanel);
                 BurpExtender.rootPanel.repaint();
                 BurpExtender.rootPanel.revalidate();
-                loadingPanel.initialize();
-                loadingPanel.registerOnCompleteCallback(() -> {
-                    BurpExtender.rootPanel.remove(loadingPanel);
-                    BurpExtender.mainPanel = new MainPanel(multiplayer, logger);
-                    BurpExtender.rootPanel.add(mainPanel);
-
-                    // HTTP Listener
-                    BurpExtender.callbacks.registerHttpListener(multiplayer);
+                selectProjectPanel.onProjectSelection(() -> {
+                    BurpExtender.rootPanel.remove(selectProjectPanel);
+                    
+                    // Loading Panel
+                    BurpExtender.rootPanel.add(loadingPanel);             
                     BurpExtender.rootPanel.repaint();
-                    BurpExtender.rootPanel.revalidate();    
-                });
+                    BurpExtender.rootPanel.revalidate();
+                    loadingPanel.initialize();
+                    loadingPanel.registerOnCompleteCallback(() -> {
+                        BurpExtender.rootPanel.remove(loadingPanel);
+                        
+                        // Main Panel
+                        BurpExtender.mainPanel = new MainPanel(multiplayer, logger);
+                        BurpExtender.rootPanel.add(mainPanel);
+                        BurpExtender.callbacks.registerHttpListener(multiplayer);
+                        BurpExtender.rootPanel.repaint();
+                        BurpExtender.rootPanel.revalidate();    
+                    });
+
                 
+                });                
             });
             
             BurpExtender.rootPanel.repaint();
