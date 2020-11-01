@@ -8,6 +8,7 @@ package burp.gui;
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
 import burp.MultiplayerLogger;
+import burp.version.MultiplayerSemanticVersion;
 import burp.version.MultiplayerVersion;
 import java.awt.Desktop;
 import java.io.IOException;
@@ -227,13 +228,13 @@ public final class ConnectionPanel extends javax.swing.JPanel {
 
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
 
-        this.connectButton.setEnabled(false);
+        connectButton.setEnabled(false);
         
-        String hostname = this.hostnameTextField.getText();
-        Integer port = Integer.parseInt(this.portNumberTextField.getText());
+        String hostname = hostnameTextField.getText();
+        Integer port = Integer.parseInt(portNumberTextField.getText());
 
         try {
-            Boolean connected = this.multiplayer.connect(hostname, port);
+            Boolean connected = multiplayer.connect(hostname, port);
             if (connected) {
                 
                 if (saveSettingsCheckBox.isSelected()) {
@@ -249,7 +250,7 @@ public final class ConnectionPanel extends javax.swing.JPanel {
                 String.format("Failed to connect.\n%s", err),
                 "Conncection Error",
                 JOptionPane.ERROR_MESSAGE);
-            this.connectButton.setEnabled(true);
+            connectButton.setEnabled(true);
         }
     }//GEN-LAST:event_connectButtonActionPerformed
 

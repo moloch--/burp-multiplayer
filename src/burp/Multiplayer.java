@@ -208,11 +208,11 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             while (dbLoaded < dbCount) {
                 
                 Result<MultiplayerRequestResponse> result = http()
-                        .orderBy().optArg("index", r.asc("time"))
-                        .skip(dbLoaded)
-                        .limit(step)
-                        .run(dbConn, MultiplayerRequestResponse.class);    
-                
+                    .orderBy().optArg("index", r.asc("time"))
+                    .skip(dbLoaded)
+                    .limit(step)
+                    .run(dbConn, MultiplayerRequestResponse.class);    
+
                 while (result.hasNext()) {
                     MultiplayerRequestResponse entry = result.next();
                     logger.debug("Got entry %d of %d: %s", dbLoaded, dbCount, entry);
@@ -548,10 +548,10 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         return r.db(dbName).table(VersionTable);
     }
     
-    private MultiplayerSemanticVersion getDatabaseSemVer() {
+    public MultiplayerSemanticVersion getDatabaseSemanticVerion() {
         Result<MultiplayerSemanticVersion> result = version()
-                .limit(1)
-                .run(dbConn, MultiplayerSemanticVersion.class);
+            .limit(1)
+            .run(dbConn, MultiplayerSemanticVersion.class);
         return result.single();
     }
     

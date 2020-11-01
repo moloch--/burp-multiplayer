@@ -8,6 +8,7 @@ package burp.gui;
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
 import burp.MultiplayerLogger;
+import burp.version.MultiplayerSemanticVersion;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultListModel;
@@ -134,12 +135,28 @@ public class SelectProjectPanel extends javax.swing.JPanel {
         String project = projectsJList.getSelectedValue();
         if (project != null && !project.isBlank() && !project.isEmpty()) {
             multiplayer.setProject(project);
+            
+            logger.debug("Version check ...");
+            MultiplayerSemanticVersion mySemVer = MultiplayerSemanticVersion.mySemanticVerion();
+            MultiplayerSemanticVersion dbSemVer = multiplayer.getDatabaseSemanticVerion();
+
+            if (dbSemVer == null || !mySemVer.isCompatible(dbSemVer)) {
+                JOptionPane.showMessageDialog(this,
+                    "The project database contains a different version than your extension. ",
+                    "Compatability Warning",
+                    JOptionPane.WARNING_MESSAGE);
+            }
+
             triggerOnProjectSelection();
         }
     }//GEN-LAST:event_selectProjectButtonActionPerformed
 
     private void createProjectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createProjectButtonActionPerformed
-        String projectName = JOptionPane.showInputDialog(null, "New project name:", "Create Project", JOptionPane.QUESTION_MESSAGE);
+        String projectName = JOptionPane.showInputDialog(null, 
+            "New project name:", 
+            "Create Project", 
+            JOptionPane.QUESTION_MESSAGE);
+        
         if (projectName != null && !projectName.isBlank() && !projectName.isEmpty()) {
             multiplayer.setProject(projectName);
             triggerOnProjectSelection();   
@@ -150,7 +167,13 @@ public class SelectProjectPanel extends javax.swing.JPanel {
         String project = projectsJList.getSelectedValue();
         if (project != null && !project.isBlank() && !project.isEmpty()) {
             String message = String.format("Delete project '%s'?", project);
-            int confirmation = JOptionPane.showConfirmDialog(null, message, "Delete Project", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE);
+            
+            int confirmation = JOptionPane.showConfirmDialog(null, 
+                message,
+                "Delete Project",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.ERROR_MESSAGE);
+            
             logger.debug("Confirmation: %d", confirmation);
             if (confirmation == 0) {
                 multiplayer.deleteProject(project);
