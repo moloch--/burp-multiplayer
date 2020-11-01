@@ -208,9 +208,9 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
             while (dbLoaded < dbCount) {
                 
                 Result<MultiplayerRequestResponse> result = http()
+                        .orderBy().optArg("index", r.asc("time"))
                         .skip(dbLoaded)
                         .limit(step)
-                        .orderBy().optArg("index", r.asc("time"))
                         .run(dbConn, MultiplayerRequestResponse.class);    
                 
                 while (result.hasNext()) {
