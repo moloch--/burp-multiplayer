@@ -88,23 +88,25 @@
                               <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
-                                      <Component id="jButton6" min="-2" max="-2" attributes="0"/>
+                                      <Component id="add1MiBMaxResponse" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="jButton5" min="-2" max="-2" attributes="0"/>
+                                      <Component id="add1KiBMaxResponse" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="jButton7" min="-2" max="-2" attributes="0"/>
+                                      <Component id="minus1KiBMaxResponse" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="jButton8" min="-2" max="-2" attributes="0"/>
+                                      <Component id="minus1MiBMaxResponse" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="102" attributes="0">
-                                      <Component id="jButton2" min="-2" max="-2" attributes="0"/>
+                                      <Component id="add1MiBMaxRequest" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="jButton1" min="-2" pref="71" max="-2" attributes="0"/>
+                                      <Component id="add1KiBMaxRequest" min="-2" pref="71" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="jButton3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="minus1KiBMaxRequest" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="jButton4" min="-2" max="-2" attributes="0"/>
+                                      <Component id="minus1MiBMaxRequest" min="-2" max="-2" attributes="0"/>
                                   </Group>
+                                  <Component id="currentMaxRequestLabel" min="-2" max="-2" attributes="0"/>
+                                  <Component id="currentMaxResponseLabel" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace min="0" pref="278" max="32767" attributes="0"/>
                           </Group>
@@ -182,24 +184,30 @@
                               <Component id="jScrollPane3" alignment="0" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
-                              <Component id="maxRequestLabel" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="maxRequestLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="currentMaxRequestLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="maxRequestSpinner" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jButton2" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jButton3" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jButton4" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jButton1" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="add1MiBMaxRequest" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="minus1KiBMaxRequest" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="minus1MiBMaxRequest" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="add1KiBMaxRequest" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
-                              <Component id="maxResponseLabel" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="maxResponseLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="currentMaxResponseLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="maxResponseSpinner" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jButton6" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jButton7" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jButton8" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jButton5" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="add1MiBMaxResponse" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="minus1KiBMaxResponse" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="minus1MiBMaxResponse" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="add1KiBMaxResponse" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                       </Group>
@@ -553,6 +561,9 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JSpinner" name="maxRequestSpinner">
+      <Events>
+        <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="maxRequestSpinnerStateChanged"/>
+      </Events>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_InitCodePre" type="java.lang.String" value="maxRequestSpinner.setModel(multiplayer.getMaxRequestSizeModel());"/>
       </AuxValues>
@@ -563,49 +574,86 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JSpinner" name="maxResponseSpinner">
+      <Events>
+        <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="maxResponseSpinnerStateChanged"/>
+      </Events>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_InitCodePre" type="java.lang.String" value="maxResponseSpinner.setModel(multiplayer.getMaxResponseSizeModel());"/>
       </AuxValues>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton1">
+    <Component class="javax.swing.JButton" name="add1KiBMaxRequest">
       <Properties>
         <Property name="text" type="java.lang.String" value="+1KiB"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="add1KiBMaxRequestActionPerformed"/>
+      </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton2">
+    <Component class="javax.swing.JButton" name="add1MiBMaxRequest">
       <Properties>
         <Property name="text" type="java.lang.String" value="+1MiB"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="add1MiBMaxRequestActionPerformed"/>
+      </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton3">
+    <Component class="javax.swing.JButton" name="minus1KiBMaxRequest">
       <Properties>
-        <Property name="text" type="java.lang.String" value="-1Kb"/>
+        <Property name="text" type="java.lang.String" value="-1KiB"/>
         <Property name="actionCommand" type="java.lang.String" value="-1KiB"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="minus1KiBMaxRequestActionPerformed"/>
+      </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton4">
+    <Component class="javax.swing.JButton" name="minus1MiBMaxRequest">
       <Properties>
         <Property name="text" type="java.lang.String" value="-1MiB"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="minus1MiBMaxRequestActionPerformed"/>
+      </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton5">
+    <Component class="javax.swing.JButton" name="add1KiBMaxResponse">
       <Properties>
         <Property name="text" type="java.lang.String" value="+1KiB"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="add1KiBMaxResponseActionPerformed"/>
+      </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton6">
+    <Component class="javax.swing.JButton" name="add1MiBMaxResponse">
       <Properties>
         <Property name="text" type="java.lang.String" value="+1MiB"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="add1MiBMaxResponseActionPerformed"/>
+      </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton7">
+    <Component class="javax.swing.JButton" name="minus1KiBMaxResponse">
       <Properties>
         <Property name="text" type="java.lang.String" value="-1KiB"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="minus1KiBMaxResponseActionPerformed"/>
+      </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton8">
+    <Component class="javax.swing.JButton" name="minus1MiBMaxResponse">
       <Properties>
         <Property name="text" type="java.lang.String" value="-1MiB"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="minus1MiBMaxResponseActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="currentMaxRequestLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="()"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="currentMaxResponseLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="()"/>
       </Properties>
     </Component>
   </SubComponents>

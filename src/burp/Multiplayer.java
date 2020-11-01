@@ -72,7 +72,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     private final SpinnerModel maxRequestSizeModel = new SpinnerNumberModel();
     private final SpinnerModel maxResponseSizeModel = new SpinnerNumberModel();
     
-    private final Integer defaultMaxSize = 2 * (1024 & 1024); // 2 MiB
+    private final Integer defaultMaxSize = 2 * (1024 * 1024); // 2 MiB
 
     public HTTPHistory history;
     private final MultiplayerLogger logger;

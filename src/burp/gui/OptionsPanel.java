@@ -85,6 +85,7 @@ public class OptionsPanel extends javax.swing.JPanel {
         loadIgnoredStatusCodesList();
         loadIgnoredURLPatternsList();
         loadIgnoredToolsList();
+        loadMaxSizes();
         
         String level = logger.getLevel();
         logger.debug("Init log level '%s'", level);
@@ -153,6 +154,17 @@ public class OptionsPanel extends javax.swing.JPanel {
                 logger.error(err);
                 saveExtensionSetting("ignoredStatusCodes", null);
             }
+        }
+    }
+    
+    private void loadMaxSizes() {
+        String maxRequestSize = loadExtensionSetting("maxRequestSize");
+        if (maxRequestSize != null) {
+            maxRequestSpinner.setValue(Integer.parseInt(maxRequestSize));
+        }
+        String maxResponseSize = loadExtensionSetting("maxResponseSize");
+        if (maxResponseSize != null) {
+            maxResponseSpinner.setValue(Integer.parseInt(maxResponseSize));
         }
     }
     
@@ -310,14 +322,16 @@ public class OptionsPanel extends javax.swing.JPanel {
         maxRequestSpinner = new javax.swing.JSpinner();
         maxResponseLabel = new javax.swing.JLabel();
         maxResponseSpinner = new javax.swing.JSpinner();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
-        jButton6 = new javax.swing.JButton();
-        jButton7 = new javax.swing.JButton();
-        jButton8 = new javax.swing.JButton();
+        add1KiBMaxRequest = new javax.swing.JButton();
+        add1MiBMaxRequest = new javax.swing.JButton();
+        minus1KiBMaxRequest = new javax.swing.JButton();
+        minus1MiBMaxRequest = new javax.swing.JButton();
+        add1KiBMaxResponse = new javax.swing.JButton();
+        add1MiBMaxResponse = new javax.swing.JButton();
+        minus1KiBMaxResponse = new javax.swing.JButton();
+        minus1MiBMaxResponse = new javax.swing.JButton();
+        currentMaxRequestLabel = new javax.swing.JLabel();
+        currentMaxResponseLabel = new javax.swing.JLabel();
 
         ignoreFileExtensionLabel.setFont(new java.awt.Font(".SF NS Text", 1, 13)); // NOI18N
         ignoreFileExtensionLabel.setText("Ignore File Extensions");
@@ -507,27 +521,81 @@ public class OptionsPanel extends javax.swing.JPanel {
         maxRequestLabel.setText("Max Request Size");
 
         maxRequestSpinner.setModel(multiplayer.getMaxRequestSizeModel());
+        maxRequestSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                maxRequestSpinnerStateChanged(evt);
+            }
+        });
 
         maxResponseLabel.setText("Max Response Size");
 
         maxResponseSpinner.setModel(multiplayer.getMaxResponseSizeModel());
+        maxResponseSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                maxResponseSpinnerStateChanged(evt);
+            }
+        });
 
-        jButton1.setText("+1KiB");
+        add1KiBMaxRequest.setText("+1KiB");
+        add1KiBMaxRequest.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                add1KiBMaxRequestActionPerformed(evt);
+            }
+        });
 
-        jButton2.setText("+1MiB");
+        add1MiBMaxRequest.setText("+1MiB");
+        add1MiBMaxRequest.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                add1MiBMaxRequestActionPerformed(evt);
+            }
+        });
 
-        jButton3.setText("-1Kb");
-        jButton3.setActionCommand("-1KiB");
+        minus1KiBMaxRequest.setText("-1KiB");
+        minus1KiBMaxRequest.setActionCommand("-1KiB");
+        minus1KiBMaxRequest.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                minus1KiBMaxRequestActionPerformed(evt);
+            }
+        });
 
-        jButton4.setText("-1MiB");
+        minus1MiBMaxRequest.setText("-1MiB");
+        minus1MiBMaxRequest.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                minus1MiBMaxRequestActionPerformed(evt);
+            }
+        });
 
-        jButton5.setText("+1KiB");
+        add1KiBMaxResponse.setText("+1KiB");
+        add1KiBMaxResponse.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                add1KiBMaxResponseActionPerformed(evt);
+            }
+        });
 
-        jButton6.setText("+1MiB");
+        add1MiBMaxResponse.setText("+1MiB");
+        add1MiBMaxResponse.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                add1MiBMaxResponseActionPerformed(evt);
+            }
+        });
 
-        jButton7.setText("-1KiB");
+        minus1KiBMaxResponse.setText("-1KiB");
+        minus1KiBMaxResponse.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                minus1KiBMaxResponseActionPerformed(evt);
+            }
+        });
 
-        jButton8.setText("-1MiB");
+        minus1MiBMaxResponse.setText("-1MiB");
+        minus1MiBMaxResponse.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                minus1MiBMaxResponseActionPerformed(evt);
+            }
+        });
+
+        currentMaxRequestLabel.setText("()");
+
+        currentMaxResponseLabel.setText("()");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -591,21 +659,23 @@ public class OptionsPanel extends javax.swing.JPanel {
                                 .addGap(6, 6, 6)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jButton6)
+                                        .addComponent(add1MiBMaxResponse)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jButton5)
+                                        .addComponent(add1KiBMaxResponse)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jButton7)
+                                        .addComponent(minus1KiBMaxResponse)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jButton8))
+                                        .addComponent(minus1MiBMaxResponse))
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jButton2)
+                                        .addComponent(add1MiBMaxRequest)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(add1KiBMaxRequest, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jButton3)
+                                        .addComponent(minus1KiBMaxRequest)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jButton4)))
+                                        .addComponent(minus1MiBMaxRequest))
+                                    .addComponent(currentMaxRequestLabel)
+                                    .addComponent(currentMaxResponseLabel))
                                 .addGap(0, 278, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -662,23 +732,27 @@ public class OptionsPanel extends javax.swing.JPanel {
                                     .addComponent(removeIgnoreURLPatternButton))
                                 .addComponent(jScrollPane3))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(maxRequestLabel)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(maxRequestLabel)
+                                    .addComponent(currentMaxRequestLabel))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(maxRequestSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jButton2)
-                                    .addComponent(jButton3)
-                                    .addComponent(jButton4)
-                                    .addComponent(jButton1))
+                                    .addComponent(add1MiBMaxRequest)
+                                    .addComponent(minus1KiBMaxRequest)
+                                    .addComponent(minus1MiBMaxRequest)
+                                    .addComponent(add1KiBMaxRequest))
                                 .addGap(24, 24, 24)
-                                .addComponent(maxResponseLabel)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(maxResponseLabel)
+                                    .addComponent(currentMaxResponseLabel))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(maxResponseSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jButton6)
-                                    .addComponent(jButton7)
-                                    .addComponent(jButton8)
-                                    .addComponent(jButton5)))))
+                                    .addComponent(add1MiBMaxResponse)
+                                    .addComponent(minus1KiBMaxResponse)
+                                    .addComponent(minus1MiBMaxResponse)
+                                    .addComponent(add1KiBMaxResponse)))))
                     .addComponent(jSeparator1)
                     .addComponent(jSeparator2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
@@ -867,11 +941,87 @@ public class OptionsPanel extends javax.swing.JPanel {
         saveIgnoredToolsList();
     }//GEN-LAST:event_ignoreSequencerCheckBoxActionPerformed
 
+    private void maxRequestSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maxRequestSpinnerStateChanged
+        Integer maxRequest = (Integer) maxRequestSpinner.getValue();
+        saveExtensionSetting("maxRequestSize", String.format("%d", maxRequest));
+        String label = String.format("(%s)", humanReadableByteCount(maxRequest));
+        currentMaxRequestLabel.setText(label);
+    }//GEN-LAST:event_maxRequestSpinnerStateChanged
+
+    private void maxResponseSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maxResponseSpinnerStateChanged
+        Integer maxResponse = (Integer) maxResponseSpinner.getValue();
+        saveExtensionSetting("maxResponseSize", String.format("%d", maxResponse));
+        String label = String.format("(%s)", humanReadableByteCount(maxResponse));
+        currentMaxResponseLabel.setText(label);
+    }//GEN-LAST:event_maxResponseSpinnerStateChanged
+
+    private void add1MiBMaxRequestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add1MiBMaxRequestActionPerformed
+        Integer maxRequest = (Integer) maxRequestSpinner.getValue();
+        maxRequestSpinner.setValue(maxRequest + MiB);
+    }//GEN-LAST:event_add1MiBMaxRequestActionPerformed
+
+    private void add1KiBMaxRequestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add1KiBMaxRequestActionPerformed
+        Integer maxRequest = (Integer) maxRequestSpinner.getValue();
+        maxRequestSpinner.setValue(maxRequest + KiB);
+    }//GEN-LAST:event_add1KiBMaxRequestActionPerformed
+
+    private void minus1KiBMaxRequestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minus1KiBMaxRequestActionPerformed
+        Integer maxRequest = (Integer) maxRequestSpinner.getValue();
+        Integer value = maxRequest - KiB;
+        if (value < 0) {
+            value = 0;
+        }
+        maxRequestSpinner.setValue(value);
+    }//GEN-LAST:event_minus1KiBMaxRequestActionPerformed
+
+    private void minus1MiBMaxRequestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minus1MiBMaxRequestActionPerformed
+        Integer maxRequest = (Integer) maxRequestSpinner.getValue();
+        Integer value = maxRequest - MiB;
+        if (value < 0) {
+            value = 0;
+        }
+        maxRequestSpinner.setValue(value);
+    }//GEN-LAST:event_minus1MiBMaxRequestActionPerformed
+
+    private void add1MiBMaxResponseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add1MiBMaxResponseActionPerformed
+        Integer maxResponse = (Integer) maxResponseSpinner.getValue();
+        maxResponseSpinner.setValue(maxResponse + MiB);
+    }//GEN-LAST:event_add1MiBMaxResponseActionPerformed
+
+    private void add1KiBMaxResponseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add1KiBMaxResponseActionPerformed
+        Integer maxResponse = (Integer) maxResponseSpinner.getValue();
+        maxResponseSpinner.setValue(maxResponse + KiB);
+    }//GEN-LAST:event_add1KiBMaxResponseActionPerformed
+
+    private void minus1KiBMaxResponseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minus1KiBMaxResponseActionPerformed
+        Integer maxResponse = (Integer) maxResponseSpinner.getValue();
+        Integer value = maxResponse - KiB;
+        if (value < 0) {
+            value = 0;
+        }
+        maxResponseSpinner.setValue(value);
+    }//GEN-LAST:event_minus1KiBMaxResponseActionPerformed
+
+    private void minus1MiBMaxResponseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minus1MiBMaxResponseActionPerformed
+        Integer maxResponse = (Integer) maxResponseSpinner.getValue();
+        Integer value = maxResponse - MiB;
+        if (value < 0) {
+            value = 0;
+        }
+        maxResponseSpinner.setValue(value);
+    }//GEN-LAST:event_minus1MiBMaxResponseActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton add1KiBMaxRequest;
+    private javax.swing.JButton add1KiBMaxResponse;
+    private javax.swing.JButton add1MiBMaxRequest;
+    private javax.swing.JButton add1MiBMaxResponse;
     private javax.swing.JButton addIgnoreFileExtensionButton;
     private javax.swing.JButton addIgnoreStatusCodeButton;
     private javax.swing.JButton addIgnoreURLPatternButton;
+    private javax.swing.JLabel currentMaxRequestLabel;
+    private javax.swing.JLabel currentMaxResponseLabel;
     private javax.swing.JButton disconnectButton;
     private javax.swing.JCheckBox ignoreComparerCheckBox;
     private javax.swing.JCheckBox ignoreDecoderCheckBox;
@@ -886,14 +1036,6 @@ public class OptionsPanel extends javax.swing.JPanel {
     private javax.swing.JList<Pattern> ignoreURLPatternJList;
     private javax.swing.JList<String> ignoredFileExtensionJList;
     private javax.swing.JList<String> ignoredStatusCodesJList;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
-    private javax.swing.JButton jButton7;
-    private javax.swing.JButton jButton8;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -908,6 +1050,10 @@ public class OptionsPanel extends javax.swing.JPanel {
     private javax.swing.JSpinner maxRequestSpinner;
     private javax.swing.JLabel maxResponseLabel;
     private javax.swing.JSpinner maxResponseSpinner;
+    private javax.swing.JButton minus1KiBMaxRequest;
+    private javax.swing.JButton minus1KiBMaxResponse;
+    private javax.swing.JButton minus1MiBMaxRequest;
+    private javax.swing.JButton minus1MiBMaxResponse;
     private javax.swing.JLabel otherOptionsLabel;
     private javax.swing.JCheckBox overwriteDuplicatesCheckBox;
     private javax.swing.JButton removeIgnoreFileExtensionButton;

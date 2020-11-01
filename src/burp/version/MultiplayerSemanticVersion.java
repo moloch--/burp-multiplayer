@@ -5,7 +5,6 @@
  */
 package burp.version;
 
-import burp.MultiplayerLogger;
 import java.util.Objects;
 
 /**
