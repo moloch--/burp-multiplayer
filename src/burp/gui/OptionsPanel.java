@@ -943,6 +943,10 @@ public class OptionsPanel extends javax.swing.JPanel {
 
     private void maxRequestSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maxRequestSpinnerStateChanged
         Integer maxRequest = (Integer) maxRequestSpinner.getValue();
+        if (maxRequest < 0) {
+            maxRequestSpinner.setValue(0);
+            return;
+        }
         saveExtensionSetting("maxRequestSize", String.format("%d", maxRequest));
         String label = String.format("(%s)", humanReadableByteCount(maxRequest));
         currentMaxRequestLabel.setText(label);
@@ -950,6 +954,10 @@ public class OptionsPanel extends javax.swing.JPanel {
 
     private void maxResponseSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_maxResponseSpinnerStateChanged
         Integer maxResponse = (Integer) maxResponseSpinner.getValue();
+        if (maxResponse < 0) {
+            maxResponseSpinner.setValue(0);
+            return;
+        }
         saveExtensionSetting("maxResponseSize", String.format("%d", maxResponse));
         String label = String.format("(%s)", humanReadableByteCount(maxResponse));
         currentMaxResponseLabel.setText(label);
