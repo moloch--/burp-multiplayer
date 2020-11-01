@@ -1,5 +1,6 @@
 package burp;
 
+import burp.version.MultiplayerSemanticVersion;
 import com.rethinkdb.RethinkDB;
 import com.rethinkdb.gen.ast.Table;
 import com.rethinkdb.gen.exc.ReqlDriverError;
@@ -9,6 +10,7 @@ import com.rethinkdb.net.Result;
 
 import java.net.URL;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -16,6 +18,8 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.DefaultListModel;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 
 /**
  *
@@ -25,6 +29,8 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
 
     private static final RethinkDB r = RethinkDB.r;
     private static final String HTTPTable = "http";
+    private static final String VersionTable = "version";
+    
     private Connection dbConn = null;
     private String dbHostname;
     private Integer dbPort;
@@ -62,6 +68,11 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     private final List<String> defaultIgnoredStatusCodes = new ArrayList<>(Arrays.asList(
         "404"
     ));
+    
+    private final SpinnerModel maxRequestSizeModel = new SpinnerNumberModel();
+    private final SpinnerModel maxResponseSizeModel = new SpinnerNumberModel();
+    
+    private final Integer defaultMaxSize = 2 * (1024 & 1024); // 2 MiB
 
     public HTTPHistory history;
     private final MultiplayerLogger logger;
@@ -83,6 +94,9 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         defaultIgnoredTools.forEach(toolFlag -> {
            ignoredTools.addElement(toolFlag); 
         });
+        
+        maxRequestSizeModel.setValue(defaultMaxSize);
+        maxResponseSizeModel.setValue(defaultMaxSize);
     }
     
     // Database = Project Name
@@ -155,17 +169,21 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
         // Create Database
         r.dbCreate(dbName).run(dbConn);
         
-        // Create Table
+        // HTTP Table
+        logger.info("Creating '%s' table ...", HTTPTable);
         r.db(dbName).tableCreate(HTTPTable).run(dbConn);
+        r.db(dbName).table(HTTPTable).indexCreate("time").run(dbConn);
         
-        // Create Indexes
-//        r.db(dbName).table(HTTPTable).indexCreate("protocol").run(dbConn);
-//        r.db(dbName).table(HTTPTable).indexCreate("host").run(dbConn);
-//        r.db(dbName).table(HTTPTable).indexCreate("port").run(dbConn);
-//        r.db(dbName).table(HTTPTable).indexCreate("path").run(dbConn);
-//        r.db(dbName).table(HTTPTable).indexCreate("method").run(dbConn);
-//        r.db(dbName).table(HTTPTable).indexCreate("status").run(dbConn);
-//        r.db(dbName).table(HTTPTable).indexCreate("highlight").run(dbConn);
+        // Version Table
+        logger.info("Creating '%s' table ...", VersionTable);
+        r.db(dbName).tableCreate(VersionTable).run(dbConn);
+        MultiplayerSemanticVersion version = MultiplayerSemanticVersion.mySemanticVerion();
+        version().insert(
+            r.hashMap("major", version.getMajor())
+                .with("minor", version.getMinor())
+                .with("path", version.getPatch())
+        ).run(dbConn);
+
     }
     
     private void initalizeHistory() {
@@ -187,9 +205,14 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
              // load the history, but in my testing it doesn't seem to have a
              // major impact on load times so I left it at 1 for now.
             int step = 1;
-            
             while (dbLoaded < dbCount) {
-                Result<MultiplayerRequestResponse> result = http().skip(dbLoaded).limit(step).run(dbConn, MultiplayerRequestResponse.class);    
+                
+                Result<MultiplayerRequestResponse> result = http()
+                        .skip(dbLoaded)
+                        .limit(step)
+                        .orderBy().optArg("index", r.asc("time"))
+                        .run(dbConn, MultiplayerRequestResponse.class);    
+                
                 while (result.hasNext()) {
                     MultiplayerRequestResponse entry = result.next();
                     logger.debug("Got entry %d of %d: %s", dbLoaded, dbCount, entry);
@@ -372,6 +395,30 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     public Boolean getUniqueQueryParameters() {
         return uniqueQueryParameters;
     }
+    
+    public void setMaxRequestSize(Integer size) {
+        maxRequestSizeModel.setValue(size);
+    }
+    
+    public Integer getMaxRequestSize() {
+        return (Integer) maxRequestSizeModel.getValue();
+    }
+    
+    public SpinnerModel getMaxRequestSizeModel() {
+        return maxRequestSizeModel;
+    }
+    
+    public void setMaxResponseSize(Integer size) {
+        maxResponseSizeModel.setValue(size);
+    }
+    
+    public Integer getMaxResponseSize() {
+        return (Integer) maxResponseSizeModel.getValue();
+    }
+    
+    public SpinnerModel getMaxResponseSizeModel() {
+        return maxResponseSizeModel;
+    }
 
     // ---------------------
     //  Burp HTTP Callback
@@ -417,6 +464,18 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
                         return;
                     }
                 }
+            }
+            
+            Integer requestSize = burpReqResp.getRequest().length;
+            if (getMaxRequestSize() < requestSize) {
+                logger.debug("Ignore: request too large (max: %d size: %d)", getMaxRequestSize(), requestSize);
+                return;
+            }
+          
+            Integer responseSize = burpReqResp.getResponse().length;
+            if (getMaxResponseSize() < responseSize) {
+                logger.debug("Ignore: response too large (max: %d size: %d)", getMaxResponseSize(), responseSize);
+                return;
             }
             
             if (!isDuplicate(burpReqResp) || overwriteDuplicates) {
@@ -474,7 +533,7 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
                 builder.append(String.format("%02x", data));
             }
             return builder.toString();
-        } catch (Exception err) {
+        } catch (NoSuchAlgorithmException err) {
             logger.error(err);
         }
         return "";
@@ -483,6 +542,17 @@ public class Multiplayer implements IHttpListener, OnEditCallback {
     // Database Helpers
     private Table http() {
         return r.db(dbName).table(HTTPTable);
+    }
+    
+    private Table version() {
+        return r.db(dbName).table(VersionTable);
+    }
+    
+    private MultiplayerSemanticVersion getDatabaseSemVer() {
+        Result<MultiplayerSemanticVersion> result = version()
+                .limit(1)
+                .run(dbConn, MultiplayerSemanticVersion.class);
+        return result.single();
     }
     
     private Connection dbConnect() {

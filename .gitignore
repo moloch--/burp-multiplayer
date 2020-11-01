@@ -12,3 +12,6 @@ build/**
 .settings/
 
 rethinkdb_data/
+
+
+MultiplayerVersion.java

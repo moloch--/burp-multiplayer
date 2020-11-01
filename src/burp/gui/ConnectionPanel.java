@@ -8,13 +8,12 @@ package burp.gui;
 import burp.IBurpExtenderCallbacks;
 import burp.Multiplayer;
 import burp.MultiplayerLogger;
+import burp.version.MultiplayerVersion;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -24,7 +23,7 @@ import javax.swing.JOptionPane;
 public final class ConnectionPanel extends javax.swing.JPanel {
 
     private final Multiplayer multiplayer;
-    private List<Runnable> onConnectCallbacks = new ArrayList<>();
+    private final List<Runnable> onConnectCallbacks = new ArrayList<>();
     private final IBurpExtenderCallbacks callbacks;
     private final MultiplayerLogger logger;
     
@@ -42,6 +41,20 @@ public final class ConnectionPanel extends javax.swing.JPanel {
         this.multiplayer = multiplayer;
         initComponents();
         initLoadSettings();
+        initVersion();
+    }
+    
+    private void initVersion() {
+        String version = String.format("v%s - %s - %s", 
+                MultiplayerVersion.VERSION,
+                MultiplayerVersion.BUILD_DATE,
+                MultiplayerVersion.GIT_SHA);
+        
+        if (MultiplayerVersion.DIRTY == 1) {
+            version = String.format("%s - DIRTY", version);
+        }
+        logger.info(version);
+        versionLabel.setText(version);
     }
     
     public void initLoadSettings() {
@@ -63,9 +76,9 @@ public final class ConnectionPanel extends javax.swing.JPanel {
     }
     
     private void triggerOnConnection() {
-        for (Runnable callback : onConnectCallbacks) {
+        onConnectCallbacks.forEach(callback -> {
             callback.run();
-        }
+        });
     }
     
     private void saveExtensionSetting(String name, String value) {
@@ -96,6 +109,7 @@ public final class ConnectionPanel extends javax.swing.JPanel {
         saveSettingsCheckBox = new javax.swing.JCheckBox();
         setupHelpButton = new javax.swing.JButton();
         githubButton = new javax.swing.JButton();
+        versionLabel = new javax.swing.JLabel();
 
         hoastnameLabel.setText("Hostname");
 
@@ -151,27 +165,33 @@ public final class ConnectionPanel extends javax.swing.JPanel {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(400, Short.MAX_VALUE)
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(saveSettingsCheckBox)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(titleLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(connectButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(setupHelpButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(githubButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 394, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(saveSettingsCheckBox)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(titleLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(portNumberLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(hoastnameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(10, 10, 10)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(hostnameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(portNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
-                .addContainerGap(400, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(setupHelpButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(githubButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(connectButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                            .addComponent(portNumberLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(hoastnameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(10, 10, 10)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(hostnameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(portNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                        .addGap(0, 394, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(versionLabel)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -195,7 +215,9 @@ public final class ConnectionPanel extends javax.swing.JPanel {
                 .addComponent(saveSettingsCheckBox)
                 .addGap(11, 11, 11)
                 .addComponent(connectButton)
-                .addContainerGap(323, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 317, Short.MAX_VALUE)
+                .addComponent(versionLabel)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -239,9 +261,7 @@ public final class ConnectionPanel extends javax.swing.JPanel {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
             try {
                 Desktop.getDesktop().browse(new URI(helpURI));
-            } catch (IOException err) {
-                logger.error(err);
-            } catch (URISyntaxException err) {
+            } catch (IOException | URISyntaxException err) {
                 logger.error(err);
             }
         }
@@ -251,9 +271,7 @@ public final class ConnectionPanel extends javax.swing.JPanel {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
             try {
                 Desktop.getDesktop().browse(new URI(githubURI));
-            } catch (IOException err) {
-                logger.error(err);
-            } catch (URISyntaxException err) {
+            } catch (IOException | URISyntaxException err) {
                 logger.error(err);
             }
         }
@@ -270,5 +288,6 @@ public final class ConnectionPanel extends javax.swing.JPanel {
     private javax.swing.JCheckBox saveSettingsCheckBox;
     private javax.swing.JButton setupHelpButton;
     private javax.swing.JLabel titleLabel;
+    private javax.swing.JLabel versionLabel;
     // End of variables declaration//GEN-END:variables
 }
