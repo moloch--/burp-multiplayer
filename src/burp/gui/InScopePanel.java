@@ -413,7 +413,7 @@ public final class InScopePanel extends javax.swing.JPanel implements TableModel
                 // Handle row colors
                 String id = (String) this.getValueAt(row, 0);
                 Color backgroundColor = multiplayer.history.getColorForId(id);
-                if(!component.getBackground().equals(getSelectionBackground())) {
+                if (!component.getBackground().equals(getSelectionBackground())) {
                     component.setBackground(backgroundColor);
                 }
 
