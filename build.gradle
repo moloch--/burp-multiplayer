@@ -16,9 +16,9 @@ repositories {
 }
 
 dependencies {
-    compile group: 'net.portswigger.burp.extender', name: 'burp-extender-api', version: '2.1'
-    compile group: 'com.rethinkdb', name: 'rethinkdb-driver', version: '2.4.1'
-    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
+    implementation group: 'net.portswigger.burp.extender', name: 'burp-extender-api', version: '2.1'
+    implementation group: 'com.rethinkdb', name: 'rethinkdb-driver', version: '2.4.1'
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
 }
 
 sourceSets {
@@ -50,7 +50,9 @@ project.compileJava.dependsOn(createVersionFile)
 
 // Create a task for bundling all dependencies into a jar file.
 task all(type: Jar) {
+   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     baseName = project.name
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
